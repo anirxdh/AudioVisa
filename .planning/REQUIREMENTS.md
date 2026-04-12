@@ -9,8 +9,8 @@
 
 - [x] **DATA-01**: 30 hand-curated "hero" scene descriptions with 4-6 specific sounds each, tagged with location/era/difficulty
 - [x] **DATA-02**: 170+ AI-generated scene descriptions across 7 categories (markets, historical events, city streets, nature, industrial, festivals, transport)
-- [ ] **DATA-03**: All scenes embedded via OpenAI text-embedding-3-small and indexed in turbopuffer with metadata (location, country, continent, era, difficulty, sounds list)
-- [ ] **DATA-04**: Seed script that generates embeddings and upserts all scenes to turbopuffer in one run
+- [x] **DATA-03**: All scenes embedded via OpenAI text-embedding-3-small and indexed in turbopuffer with metadata (location, country, continent, era, difficulty, sounds list)
+- [x] **DATA-04**: Seed script that generates embeddings and upserts all scenes to turbopuffer in one run
 
 ### Audio Generation
 
@@ -85,8 +85,8 @@
 |-------------|-------|--------|
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Complete |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Complete |
+| DATA-04 | Phase 2 | Complete |
 | AUDIO-01 | Phase 3 | Pending |
 | AUDIO-02 | Phase 3 | Pending |
 | AUDIO-03 | Phase 3 | Pending |

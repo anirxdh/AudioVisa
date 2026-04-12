@@ -22,19 +22,17 @@ Plans:
 ## Phase 2: Turbopuffer Integration + Embedding Pipeline
 **Goal:** All scenes embedded and indexed in turbopuffer, queryable by vector search with metadata filtering
 **Requirements:** DATA-03, DATA-04
+**Plans:** 1/1 plans complete
 
-### Tasks
-1. Create `/lib/turbopuffer.ts` — client initialization with region + API key
-2. Create `/lib/embeddings.ts` — OpenAI embedding generation (text-embedding-3-small)
-3. Create `/scripts/seed.ts` — reads scenes.json, generates embeddings, upserts to turbopuffer namespace "soundguessr-scenes"
-4. Schema: vector (embedding), plus filterable attributes: location, country, continent, era, difficulty
-5. Create `/lib/search.ts` — query wrapper that takes text input, embeds it, searches turbopuffer, returns top results with distances
-6. Test: run seed script, verify search returns relevant results for queries like "fish market Japan"
+Plans:
+- [x] 02-01-PLAN.md — Turbopuffer client, OpenAI embeddings, seed script, semantic search
 
 ### Success Criteria
 - `npx tsx scripts/seed.ts` successfully indexes all 200+ scenes
 - Vector search for "busy Asian market" returns relevant scenes
 - Metadata filtering by difficulty tier works
+
+**Note:** TURBOPUFFER_API_KEY must be set in .env.local before running seed script.
 
 ---
 
