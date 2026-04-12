@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** The core game loop must work flawlessly: hear a soundscape, guess where and when, get scored.
-**Current focus:** Phase 5 complete -- Polished frontend UI with dark theme, audio visualization, animations
+**Current focus:** Phase 7 complete -- All phases done. App is production-ready for Vercel deployment.
 
 ## Current Phase
 
-**Phase:** 5 — Frontend UI
+**Phase:** 7 — Deployment & Polish
 **Status:** Complete
 **Current Plan:** 1 of 1 (all plans complete)
-**Goal:** Polished, visually striking game interface suitable for hackathon demo video
+**Goal:** Polish, error handling, build verification
 
 ## Progress
 
@@ -26,6 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - [x] Phase 4, Plan 01 executed (game engine, scoring, 4 API routes)
 - [x] Phase 3, Plan 01 executed (ElevenLabs audio generation, caching, pre-generation script)
 - [x] Phase 5, Plan 01 executed (frontend UI: landing, game play, results pages)
+- [x] Phase 6, Plan 01 executed (OG meta tags, social sharing, Twitter intent, OG image)
+- [x] Phase 7, Plan 01 executed (error handling, fallback scorer, build verification)
 
 ## Research Artifacts
 
@@ -64,6 +66,10 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - sessionStorage for game results between play and results pages (no state library)
 - Inter font for bolder modern look matching design vision
 - useEffect for game initialization to avoid SSR fetch errors during prerendering
+- next/og ImageResponse for dynamic OG image (edge runtime, no external tooling)
+- Twitter share via intent URL (no Twitter API needed)
+- Fallback string-matching scorer when OPENAI_API_KEY missing (location substring + era proximity)
+- metadataBase uses NEXT_PUBLIC_BASE_URL with fallback to soundguessr.vercel.app
 
 ## Performance Metrics
 
@@ -75,7 +81,9 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 | 04-01      | 2min     | 3     | 7     |
 | 03-01      | 4min     | 4     | 6     |
 | 05-01      | 5min     | 5     | 9     |
+| 06-01      | 2min     | 1     | 3     |
+| 07-01      | 4min     | 2     | 5     |
 
 ---
-*Last updated: 2026-04-12 after 05-01 execution*
-*Last session stopped at: Completed 05-01-PLAN.md*
+*Last updated: 2026-04-12 after 07-01 execution*
+*Last session stopped at: Completed 06-01 and 07-01 (sharing + deployment)*
