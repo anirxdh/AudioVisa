@@ -8,6 +8,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "https://soundguessr.vercel.app"
+  ),
   title: "SoundGuessr - Guess the Sound, Find the Place",
   description:
     "Can you guess where you are just by listening? AI-generated soundscapes challenge your ears. Built with turbopuffer + ElevenLabs.",
