@@ -6,14 +6,11 @@
 ## Phase 1: Project Setup + Scene Dataset
 **Goal:** Next.js project scaffolded, 200+ scene descriptions written and stored as JSON
 **Requirements:** DATA-01, DATA-02
+**Plans:** 2 plans
 
-### Tasks
-1. Initialize Next.js 14 project with TypeScript, Tailwind CSS, App Router
-2. Install dependencies: `@turbopuffer/turbopuffer`, `@elevenlabs/elevenlabs-js`, `openai`
-3. Set up project structure: `/app`, `/lib`, `/data`, `/public/audio`
-4. Hand-write 30 hero scene descriptions as structured JSON (location, country, continent, era, difficulty, sounds array, description, sfx_prompts, music_prompt)
-5. AI-generate 170+ additional scenes using category templates (markets, historical, city streets, nature, industrial, festivals, transport)
-6. Store all scenes in `/data/scenes.json`
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold Next.js 15 project, define Scene type contract, create validation script
+- [ ] 01-02-PLAN.md — Write 30 hero scenes, AI-generate 170+ scenes, validate complete dataset
 
 ### Success Criteria
 - `npx next dev` runs without errors
@@ -169,4 +166,4 @@
 
 ---
 *Roadmap created: 2026-04-12*
-*Last updated: 2026-04-12 after initial creation*
+*Last updated: 2026-04-12 after Phase 1 planning*
