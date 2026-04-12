@@ -8,13 +8,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SoundGuessr - Guess the Place by its Soundscape",
+  title: "SoundGuessr - Guess the Sound, Find the Place",
   description:
-    "Listen to AI-generated soundscapes and guess where and when you are. Built with turbopuffer + ElevenLabs for #ElevenHacks.",
+    "Can you guess where you are just by listening? AI-generated soundscapes challenge your ears. Built with turbopuffer + ElevenLabs.",
   openGraph: {
     title: "SoundGuessr",
-    description: "Can you guess where you are... just by listening?",
+    description: "Can you guess where you are just by listening?",
     type: "website",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SoundGuessr",
+    description: "Can you guess where you are just by listening?",
   },
 };
 

@@ -111,26 +111,25 @@ export default function ResultsPage() {
     fetchSummary();
   }, [router]);
 
-  async function handleShare() {
-    if (!summary) return;
+  function getShareText(): string {
+    if (!summary) return "";
 
     const lines = [
       `\u{1F3A7} SoundGuessr - I scored ${summary.totalScore}/${summary.maxPossibleScore}!`,
+      summary.performanceRating,
       "",
+      `Play now: ${window.location.origin}`,
+      "",
+      "#ElevenHacks @turbopuffer @elevenlabsio",
     ];
 
-    summary.rounds.forEach((round) => {
-      const emoji = getScoreEmoji(round.score, round.maxScore);
-      const loc = round.location || `Round ${round.roundNumber}`;
-      lines.push(`Round ${round.roundNumber}: ${loc} ${emoji} ${round.score}`);
-    });
+    return lines.join("\n");
+  }
 
-    lines.push("");
-    lines.push(`Rating: ${summary.performanceRating}`);
-    lines.push(`Play at: ${window.location.origin}`);
-    lines.push("#ElevenHacks @turbopuffer @elevenlabsio");
+  async function handleCopyShare() {
+    if (!summary) return;
 
-    const text = lines.join("\n");
+    const text = getShareText();
 
     try {
       await navigator.clipboard.writeText(text);
@@ -147,6 +146,13 @@ export default function ResultsPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  }
+
+  function handleShareTwitter() {
+    if (!summary) return;
+    const text = getShareText();
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   if (isLoading) {
@@ -264,29 +270,44 @@ export default function ResultsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.8 }}
-        className="flex flex-col sm:flex-row gap-4 w-full max-w-lg"
+        className="flex flex-col gap-3 w-full max-w-lg"
       >
-        <button
-          onClick={handleShare}
-          className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-          style={{
-            background: copied
-              ? "var(--accent-green)"
-              : "rgba(255, 255, 255, 0.1)",
-            border: `1px solid ${
-              copied ? "var(--accent-green)" : "rgba(255, 255, 255, 0.2)"
-            }`,
-            color: copied ? "black" : "var(--text-primary)",
-          }}
-        >
-          {copied ? "Copied!" : "Share Results"}
-        </button>
+        {/* Share row */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleShareTwitter}
+            className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            style={{
+              background: "rgba(29, 161, 242, 0.15)",
+              border: "1px solid rgba(29, 161, 242, 0.4)",
+              color: "#1da1f2",
+            }}
+          >
+            Share on X
+          </button>
+          <button
+            onClick={handleCopyShare}
+            className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            style={{
+              background: copied
+                ? "var(--accent-green)"
+                : "rgba(255, 255, 255, 0.1)",
+              border: `1px solid ${
+                copied ? "var(--accent-green)" : "rgba(255, 255, 255, 0.2)"
+              }`,
+              color: copied ? "black" : "var(--text-primary)",
+            }}
+          >
+            {copied ? "Copied!" : "Copy Results"}
+          </button>
+        </div>
+        {/* Play Again */}
         <button
           onClick={() => {
             sessionStorage.removeItem("gameResults");
             router.push("/play");
           }}
-          className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+          className="w-full px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
           style={{
             background:
               "linear-gradient(135deg, var(--accent-cyan), #00c4ff)",
