@@ -19,10 +19,60 @@ interface GuessBody {
 }
 
 /**
+ * Simple string-matching fallback scorer.
+ * Used when OPENAI_API_KEY is not available (no embeddings).
+ * Compares guess text against scene location/country/era using
+ * case-insensitive substring matching.
+ */
+function fallbackScore(
+  guess: { location: string; era: string },
+  scene: { location: string; country: string; continent: string; era: string },
+  hintUsed: boolean
+): { score: number; distance: number } {
+  const maxScore = hintUsed ? 800 : 1000;
+  let points = 0;
+
+  const guessLoc = guess.location.toLowerCase().trim();
+  const sceneLoc = scene.location.toLowerCase();
+  const sceneCountry = scene.country.toLowerCase();
+  const sceneContinent = scene.continent.toLowerCase();
+
+  // Exact location match: 500 pts
+  if (guessLoc === sceneLoc || sceneLoc.includes(guessLoc) || guessLoc.includes(sceneLoc)) {
+    points += 500;
+  }
+  // Country match: 250 pts
+  else if (guessLoc.includes(sceneCountry) || sceneCountry.includes(guessLoc)) {
+    points += 250;
+  }
+  // Continent match: 100 pts
+  else if (guessLoc.includes(sceneContinent) || sceneContinent.includes(guessLoc)) {
+    points += 100;
+  }
+
+  // Era match: exact decade = 300 pts, within 20 years = 150 pts
+  const guessDecade = parseInt(guess.era.replace("s", ""), 10);
+  const sceneDecade = parseInt(scene.era.replace("s", ""), 10);
+  if (!isNaN(guessDecade) && !isNaN(sceneDecade)) {
+    const diff = Math.abs(guessDecade - sceneDecade);
+    if (diff === 0) points += 300;
+    else if (diff <= 20) points += 150;
+    else if (diff <= 50) points += 50;
+  }
+
+  const score = Math.min(points, maxScore);
+  // Approximate distance from score for consistency
+  const distance = 1 - Math.sqrt(score / 1000);
+  return { score, distance: Math.round(distance * 1000) / 1000 };
+}
+
+/**
  * POST /api/game/guess
  *
  * Accepts a player's guess for a round, embeds it, computes vector distance
  * against the correct scene, and returns the score + reveal data.
+ *
+ * Falls back to string-matching scoring if OPENAI_API_KEY is not set.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -72,22 +122,31 @@ export async function POST(request: NextRequest) {
 
     const scene = round.scene;
 
-    // Build text representations for embedding
-    const guessText = `${guess.location}, ${guess.era}`;
-    const answerText = buildSceneEmbeddingText(scene);
+    let score: number;
+    let distance: number;
 
-    // Generate embeddings in parallel
-    const [guessVector, answerVector] = await Promise.all([
-      generateEmbedding(guessText),
-      generateEmbedding(answerText),
-    ]);
+    // Use embedding-based scoring if OPENAI_API_KEY is available, else fallback
+    if (process.env.OPENAI_API_KEY) {
+      // Build text representations for embedding
+      const guessText = `${guess.location}, ${guess.era}`;
+      const answerText = buildSceneEmbeddingText(scene);
 
-    // Calculate score
-    const { score, distance } = calculateScore(
-      guessVector,
-      answerVector,
-      round.hintUsed
-    );
+      // Generate embeddings in parallel
+      const [guessVector, answerVector] = await Promise.all([
+        generateEmbedding(guessText),
+        generateEmbedding(answerText),
+      ]);
+
+      // Calculate score
+      const result = calculateScore(guessVector, answerVector, round.hintUsed);
+      score = result.score;
+      distance = result.distance;
+    } else {
+      console.warn("[game/guess] OPENAI_API_KEY not set — using fallback string-matching scorer");
+      const result = fallbackScore(guess, scene, round.hintUsed);
+      score = result.score;
+      distance = result.distance;
+    }
 
     // Update game state
     round.guess = guess;

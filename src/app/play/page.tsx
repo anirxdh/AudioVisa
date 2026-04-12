@@ -76,12 +76,14 @@ export default function PlayPage() {
     null, null, null, null, null,
   ]);
   const [error, setError] = useState<string | null>(null);
+  const [audioFailed, setAudioFailed] = useState(false);
 
   // ---- API helpers ----
 
   const startGame = useCallback(async () => {
     setPhase("loading");
     setError(null);
+    setAudioFailed(false);
     try {
       const res = await fetch("/api/game/start", { method: "POST" });
       if (!res.ok) throw new Error("Failed to start game");
@@ -95,6 +97,7 @@ export default function PlayPage() {
       // Transition to listening, load audio for first round
       await loadAudioForRound(data.rounds[0], data.gameId);
     } catch (err) {
+      setPhase("loading");
       setError("Failed to start game. Please try again.");
       console.error(err);
     }
@@ -107,6 +110,8 @@ export default function PlayPage() {
     setHintText(null);
     setHintUsed(false);
     setRoundResult(null);
+    setAudioFailed(false);
+    setError(null);
 
     if (round.audioUrls) {
       setCurrentAudioUrls(round.audioUrls);
@@ -135,8 +140,9 @@ export default function PlayPage() {
       );
     } catch (err) {
       console.error("Audio generation failed:", err);
-      // Continue without audio — user can still guess
+      // Mark audio as failed — user can skip to guessing
       setCurrentAudioUrls(null);
+      setAudioFailed(true);
     } finally {
       setIsGeneratingAudio(false);
     }
@@ -250,16 +256,44 @@ export default function PlayPage() {
           style={{ borderColor: "var(--accent-red)" }}
         >
           <p style={{ color: "var(--accent-red)" }}>{error}</p>
-          <button
-            onClick={() => {
-              setError(null);
-              startGame();
-            }}
-            className="mt-2 px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: "var(--accent-cyan)", color: "black" }}
-          >
-            Try Again
-          </button>
+          <div className="flex gap-3 justify-center mt-3">
+            <button
+              onClick={() => setError(null)}
+              className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "var(--text-primary)",
+              }}
+            >
+              Dismiss
+            </button>
+            {!gameId ? (
+              <button
+                onClick={() => {
+                  setError(null);
+                  startGame();
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
+                style={{ background: "var(--accent-cyan)", color: "black" }}
+              >
+                Try Again
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setError(null);
+                  // Retry the guess submission
+                  if (phase === "guessing" && locationGuess.trim()) {
+                    handleSubmitGuess();
+                  }
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
+                style={{ background: "var(--accent-cyan)", color: "black" }}
+              >
+                Retry
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -328,10 +362,35 @@ export default function PlayPage() {
               </div>
             )}
 
-            <AudioPlayer
-              audioUrls={currentAudioUrls}
-              onFinished={() => {}}
-            />
+            {audioFailed && !currentAudioUrls && (
+              <div
+                className="glass-card p-4 text-center w-full max-w-lg"
+                style={{
+                  borderColor: "var(--accent-amber)",
+                }}
+              >
+                <p className="text-sm mb-2" style={{ color: "var(--accent-amber)" }}>
+                  Audio generation unavailable. You can still guess based on your instincts!
+                </p>
+                <button
+                  onClick={() => setPhase("guessing")}
+                  className="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                  style={{
+                    background: "var(--accent-amber)",
+                    color: "black",
+                  }}
+                >
+                  Skip to Guess
+                </button>
+              </div>
+            )}
+
+            {!audioFailed && (
+              <AudioPlayer
+                audioUrls={currentAudioUrls}
+                onFinished={() => {}}
+              />
+            )}
 
             <button
               onClick={() => setPhase("guessing")}
