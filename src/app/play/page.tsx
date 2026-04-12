@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import AudioPlayer from "@/components/AudioPlayer";
@@ -215,12 +215,10 @@ export default function PlayPage() {
   }
 
   // ---- Start game on mount ----
-  // Using a ref to track if we've started
-  const [hasStarted, setHasStarted] = useState(false);
-  if (!hasStarted) {
-    setHasStarted(true);
+  useEffect(() => {
     startGame();
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- Render ----
 
