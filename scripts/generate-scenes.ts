@@ -188,7 +188,7 @@ ${locationList}
 
 Return the scenes in a JSON object with a "scenes" array.`;
 
-  const completion = await client.beta.chat.completions.parse({
+  const completion = await client.chat.completions.parse({
     model: MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
