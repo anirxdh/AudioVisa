@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** The core game loop must work flawlessly: hear a soundscape, guess where and when, get scored.
-**Current focus:** Phase 2 complete -- ready for Phase 3
+**Current focus:** Phase 4 complete -- game engine, scoring, and API routes built
 
 ## Current Phase
 
-**Phase:** 2 — Turbopuffer Integration + Embedding Pipeline
+**Phase:** 4 — Game Engine + Scoring
 **Status:** Complete
 **Current Plan:** 1 of 1 (all plans complete)
-**Goal:** All scenes embedded and indexed in turbopuffer, queryable by vector search with metadata filtering
+**Goal:** Core game logic: round selection, guess submission, vector-distance scoring, hint system, game summary
 
 ## Progress
 
@@ -23,6 +23,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - [x] Phase 1, Plan 01 executed (project scaffold + Scene type + validation script)
 - [x] Phase 1, Plan 02 executed (203 scenes: 30 hero + 173 AI-generated)
 - [x] Phase 2, Plan 01 executed (turbopuffer client, embeddings, search, seed script)
+- [x] Phase 4, Plan 01 executed (game engine, scoring, 4 API routes)
 
 ## Research Artifacts
 
@@ -49,6 +50,10 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - Batch size of 100 for embedding generation (progress logging vs API efficiency balance)
 - Store sounds/sfx_prompts as JSON strings in turbopuffer attributes
 - Combine location + country + era + description + sounds for embedding text
+- Quadratic scoring curve (1-distance)^2 rewards close guesses more than linear
+- In-memory Map for game state (no database, hackathon simplicity)
+- Audio-cache stub returns null until Phase 3 implements real pipeline
+- Continent revealed as text hint for accessibility when audio not available
 
 ## Performance Metrics
 
@@ -57,7 +62,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 | 01-01      | 4min     | 2     | 20    |
 | 01-02      | 20min    | 2     | 4     |
 | 02-01      | 4min     | 3     | 5     |
+| 04-01      | 2min     | 3     | 7     |
 
 ---
-*Last updated: 2026-04-12 after 02-01 execution*
-*Last session stopped at: Completed 02-01-PLAN.md*
+*Last updated: 2026-04-12 after 04-01 execution*
+*Last session stopped at: Completed 04-01-PLAN.md*

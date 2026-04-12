@@ -61,19 +61,10 @@ Plans:
 ## Phase 4: Game Engine + Scoring
 **Goal:** Core game logic: round selection, guess submission, vector-distance scoring, hint system
 **Requirements:** GAME-01, GAME-02, GAME-03, GAME-04, GAME-05, GAME-06
+**Plans:** 1/1 plans complete
 
-### Tasks
-1. Create `/lib/game-engine.ts`:
-   - `startGame()`: selects 5 scenes (2 easy, 2 medium, 1 hard) randomly from turbopuffer
-   - `submitGuess(guess, round)`: embeds guess text, computes vector distance to answer, returns score (0-1000)
-   - `useHint(round)`: flags hint used, reduces max score by 200
-   - `getGameSummary()`: returns total score, per-round data, performance rating
-2. Create API routes:
-   - `POST /api/game/start` — returns game session with 5 scene IDs + audio URLs
-   - `POST /api/game/guess` — accepts guess, returns score + reveal data
-   - `POST /api/game/hint` — returns additional audio layer for current round
-3. Scoring algorithm: convert cosine distance to 0-1000 score (0 distance = 1000, max distance = 0, with curve)
-4. Performance ratings based on total score thresholds
+Plans:
+- [x] 04-01-PLAN.md — Game engine, scoring logic, 4 API routes (start, guess, hint, summary)
 
 ### Success Criteria
 - Starting a game returns 5 scenes with correct difficulty distribution

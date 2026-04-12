@@ -22,12 +22,12 @@
 
 ### Game Mechanics
 
-- [ ] **GAME-01**: Single game session = 5 rounds with scenes selected from different difficulty tiers (2 easy, 2 medium, 1 hard)
-- [ ] **GAME-02**: Player hears soundscape and submits a guess: location (text input with autocomplete) + time period (decade selector)
-- [ ] **GAME-03**: Scoring uses vector distance between player's guess (embedded) and correct answer — closer guess = higher score (max 1000 pts per round)
-- [ ] **GAME-04**: After guessing, reveal screen shows: correct answer, map pin, historical context, score breakdown, and which sounds were playing
-- [ ] **GAME-05**: Hint system: player can request a second audio layer (additional sounds from the scene) at cost of 200 pts max score reduction
-- [ ] **GAME-06**: End-of-game summary screen shows total score, per-round breakdown, and performance rating (e.g., "Sound Tourist" → "Audio Archaeologist")
+- [x] **GAME-01**: Single game session = 5 rounds with scenes selected from different difficulty tiers (2 easy, 2 medium, 1 hard)
+- [x] **GAME-02**: Player hears soundscape and submits a guess: location (text input with autocomplete) + time period (decade selector)
+- [x] **GAME-03**: Scoring uses vector distance between player's guess (embedded) and correct answer — closer guess = higher score (max 1000 pts per round)
+- [x] **GAME-04**: After guessing, reveal screen shows: correct answer, map pin, historical context, score breakdown, and which sounds were playing
+- [x] **GAME-05**: Hint system: player can request a second audio layer (additional sounds from the scene) at cost of 200 pts max score reduction
+- [x] **GAME-06**: End-of-game summary screen shows total score, per-round breakdown, and performance rating (e.g., "Sound Tourist" → "Audio Archaeologist")
 
 ### User Interface
 
@@ -92,12 +92,12 @@
 | AUDIO-03 | Phase 3 | Pending |
 | AUDIO-04 | Phase 3 | Pending |
 | AUDIO-05 | Phase 3 | Pending |
-| GAME-01 | Phase 4 | Pending |
-| GAME-02 | Phase 4 | Pending |
-| GAME-03 | Phase 4 | Pending |
-| GAME-04 | Phase 4 | Pending |
-| GAME-05 | Phase 4 | Pending |
-| GAME-06 | Phase 4 | Pending |
+| GAME-01 | Phase 4 | Complete |
+| GAME-02 | Phase 4 | Complete |
+| GAME-03 | Phase 4 | Complete |
+| GAME-04 | Phase 4 | Complete |
+| GAME-05 | Phase 4 | Complete |
+| GAME-06 | Phase 4 | Complete |
 | UI-01 | Phase 5 | Pending |
 | UI-02 | Phase 5 | Pending |
 | UI-03 | Phase 5 | Pending |
