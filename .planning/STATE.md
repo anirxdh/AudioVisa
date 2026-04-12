@@ -10,7 +10,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Phase
 
 **Phase:** 1 — Project Setup + Scene Dataset
-**Status:** Not started
+**Status:** In progress
+**Current Plan:** 2 of 2
 **Goal:** Next.js project scaffolded, 200+ scene descriptions written and stored as JSON
 
 ## Progress
@@ -19,7 +20,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - [x] Domain research completed (turbopuffer SDK, ElevenLabs APIs, scene dataset)
 - [x] REQUIREMENTS.md written (28 v1 requirements)
 - [x] ROADMAP.md written (7 phases)
-- [ ] Phase 1 execution
+- [x] Phase 1, Plan 01 executed (project scaffold + Scene type + validation script)
+- [ ] Phase 1, Plan 02 execution (scene dataset population)
 
 ## Research Artifacts
 
@@ -30,10 +32,22 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 - User has ElevenLabs Scale subscription
 - turbopuffer hackathon credits ($128)
-- Tech stack: Next.js 14 + TypeScript + Tailwind + App Router
+- Tech stack: Next.js 16 + TypeScript + Tailwind v4 + App Router
 - Embeddings: OpenAI text-embedding-3-small
 - 30 hero scenes (hand-curated) + 170+ AI-generated scenes
 - Pre-generate audio for hero scenes, generate on-demand for rest
 
+## Decisions
+
+- Used Next.js 16 (latest from create-next-app) instead of 15 — current stable at scaffolding time
+- Exported validation constants from types/scene.ts for reuse across scripts
+- Gitignore uses specific .env.local pattern (not .env*) to allow .env.example commit
+
+## Performance Metrics
+
+| Phase-Plan | Duration | Tasks | Files |
+|------------|----------|-------|-------|
+| 01-01      | 4min     | 2     | 20    |
+
 ---
-*Last updated: 2026-04-12 after planning completion*
+*Last updated: 2026-04-12 after 01-01 execution*

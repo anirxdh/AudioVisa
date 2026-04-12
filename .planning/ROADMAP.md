@@ -9,7 +9,7 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Next.js 15 project, define Scene type contract, create validation script
+- [x] 01-01-PLAN.md — Scaffold Next.js 15 project, define Scene type contract, create validation script
 - [ ] 01-02-PLAN.md — Write 30 hero scenes, AI-generate 170+ scenes, validate complete dataset
 
 ### Success Criteria
