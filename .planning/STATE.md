@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** The core game loop must work flawlessly: hear a soundscape, guess where and when, get scored.
-**Current focus:** Phase 4 complete -- game engine, scoring, and API routes built
+**Current focus:** Phase 3 complete -- ElevenLabs audio generation pipeline with caching
 
 ## Current Phase
 
-**Phase:** 4 — Game Engine + Scoring
+**Phase:** 3 — Audio Generation Pipeline
 **Status:** Complete
 **Current Plan:** 1 of 1 (all plans complete)
-**Goal:** Core game logic: round selection, guess submission, vector-distance scoring, hint system, game summary
+**Goal:** ElevenLabs integration that generates layered soundscapes (SFX + music) for any scene, with caching
 
 ## Progress
 
@@ -24,6 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - [x] Phase 1, Plan 02 executed (203 scenes: 30 hero + 173 AI-generated)
 - [x] Phase 2, Plan 01 executed (turbopuffer client, embeddings, search, seed script)
 - [x] Phase 4, Plan 01 executed (game engine, scoring, 4 API routes)
+- [x] Phase 3, Plan 01 executed (ElevenLabs audio generation, caching, pre-generation script)
 
 ## Research Artifacts
 
@@ -54,6 +55,9 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - In-memory Map for game state (no database, hackathon simplicity)
 - Audio-cache stub returns null until Phase 3 implements real pipeline
 - Continent revealed as text hint for accessibility when audio not available
+- Used ReadableStream.getReader() for ElevenLabs stream consumption (web streams, not Node.js)
+- Gitignored public/audio/ to keep generated binary audio out of git
+- Pre-generate script has 1s delay between scenes for rate limiting
 
 ## Performance Metrics
 
@@ -63,7 +67,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 | 01-02      | 20min    | 2     | 4     |
 | 02-01      | 4min     | 3     | 5     |
 | 04-01      | 2min     | 3     | 7     |
+| 03-01      | 4min     | 4     | 6     |
 
 ---
-*Last updated: 2026-04-12 after 04-01 execution*
-*Last session stopped at: Completed 04-01-PLAN.md*
+*Last updated: 2026-04-12 after 03-01 execution*
+*Last session stopped at: Completed 03-01-PLAN.md*

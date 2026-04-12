@@ -14,11 +14,11 @@
 
 ### Audio Generation
 
-- [ ] **AUDIO-01**: Each scene generates 2-3 layered SFX clips via ElevenLabs Sound Effects API (environment base + specific sounds + ambient detail)
-- [ ] **AUDIO-02**: Each scene generates 1 era/region-appropriate background music track via ElevenLabs Music API (15-30s, instrumental)
-- [ ] **AUDIO-03**: SFX prompts are grounded in turbopuffer-retrieved descriptions (not hardcoded) — semantic retrieval drives generation quality
-- [ ] **AUDIO-04**: Generated audio is cached (stored as files or in a KV store) so repeated plays don't re-generate
-- [ ] **AUDIO-05**: 30 hero scenes have pre-generated, cached audio ready for instant playback (zero latency for demo)
+- [x] **AUDIO-01**: Each scene generates 2-3 layered SFX clips via ElevenLabs Sound Effects API (environment base + specific sounds + ambient detail)
+- [x] **AUDIO-02**: Each scene generates 1 era/region-appropriate background music track via ElevenLabs Music API (15-30s, instrumental)
+- [x] **AUDIO-03**: SFX prompts are grounded in turbopuffer-retrieved descriptions (not hardcoded) — semantic retrieval drives generation quality
+- [x] **AUDIO-04**: Generated audio is cached (stored as files or in a KV store) so repeated plays don't re-generate
+- [x] **AUDIO-05**: 30 hero scenes have pre-generated, cached audio ready for instant playback (zero latency for demo)
 
 ### Game Mechanics
 
@@ -87,11 +87,11 @@
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 2 | Complete |
 | DATA-04 | Phase 2 | Complete |
-| AUDIO-01 | Phase 3 | Pending |
-| AUDIO-02 | Phase 3 | Pending |
-| AUDIO-03 | Phase 3 | Pending |
-| AUDIO-04 | Phase 3 | Pending |
-| AUDIO-05 | Phase 3 | Pending |
+| AUDIO-01 | Phase 3 | Complete |
+| AUDIO-02 | Phase 3 | Complete |
+| AUDIO-03 | Phase 3 | Complete |
+| AUDIO-04 | Phase 3 | Complete |
+| AUDIO-05 | Phase 3 | Complete |
 | GAME-01 | Phase 4 | Complete |
 | GAME-02 | Phase 4 | Complete |
 | GAME-03 | Phase 4 | Complete |

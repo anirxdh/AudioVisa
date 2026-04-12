@@ -39,17 +39,10 @@ Plans:
 ## Phase 3: Audio Generation Pipeline
 **Goal:** ElevenLabs integration that generates layered soundscapes (SFX + music) for any scene
 **Requirements:** AUDIO-01, AUDIO-02, AUDIO-03, AUDIO-04, AUDIO-05
+**Plans:** 1/1 plans complete
 
-### Tasks
-1. Create `/lib/elevenlabs.ts` — client initialization
-2. Create `/lib/audio-generator.ts` — takes a scene, generates:
-   - 2-3 SFX clips (each 5-15s) from scene's sfx_prompts via Sound Effects API
-   - 1 background music track (15-30s) via Music API with `forceInstrumental: true`
-3. Create `/lib/audio-mixer.ts` — combines SFX + music into a single playable audio (or returns multiple tracks for layered playback)
-4. Create `/lib/audio-cache.ts` — caches generated audio to `/public/audio/{scene-id}/` as mp3 files
-5. Create API route `POST /api/generate-audio` — accepts scene ID, checks cache, generates if missing, returns audio URLs
-6. Create `/scripts/pre-generate.ts` — pre-generates audio for all 30 hero scenes
-7. Run pre-generation script for hero scenes
+Plans:
+- [x] 03-01-PLAN.md — ElevenLabs client, audio cache, generation API route, pre-generation script
 
 ### Success Criteria
 - API route returns audio URLs for any scene (cached or freshly generated)
