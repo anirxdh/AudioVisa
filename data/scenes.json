@@ -1,3 +1,672 @@
 {
-  "scenes": []
+  "scenes": [
+    {
+      "id": "tsukiji-fish-market-tokyo-1990s",
+      "location": "Tsukiji Fish Market, Tokyo",
+      "country": "Japan",
+      "continent": "Asia",
+      "era": "1990s",
+      "difficulty": "medium",
+      "description": "Predawn chaos fills the world's largest fish market as auctioneers bark rapid-fire bids over frozen tuna. Styrofoam crates scrape across wet concrete while forklift beeps echo through cavernous halls. The air hums with fluorescent lights and the rhythmic thwack of filleting knives.",
+      "sounds": [
+        "Rapid Japanese auction chanting over loudspeaker",
+        "Styrofoam crates sliding across wet concrete floor",
+        "Electric forklift backing beeps in echoing hall",
+        "Heavy tuna carcasses thudding onto metal tables",
+        "Running water from hose washing down market floor"
+      ],
+      "sfx_prompts": [
+        "Busy indoor fish market with echoing auction chanting, crate scraping, and forklift beeps on wet concrete floors at dawn",
+        "Heavy frozen fish carcasses being dropped onto stainless steel tables with running water and knife chopping sounds",
+        "Crowd murmur in a large covered market hall with fluorescent light hum and distant loudspeaker announcements in Japanese"
+      ],
+      "music_prompt": "Upbeat traditional Japanese shamisen and taiko instrumental with a modern city energy, evoking 1990s Tokyo nightlife and bustling commerce",
+      "category": "markets"
+    },
+    {
+      "id": "marrakech-jemaa-el-fnaa-1970s",
+      "location": "Jemaa el-Fnaa, Marrakech",
+      "country": "Morocco",
+      "continent": "Africa",
+      "era": "1970s",
+      "difficulty": "medium",
+      "description": "The great square pulses with a dizzying collage of snake charmers' pungi drones, storytellers commanding rapt crowds in Darija, and the clatter of brass tea sets on wooden trays. Smoke from lamb tagine grills drifts between vendors hawking spices in singsong calls.",
+      "sounds": [
+        "Snake charmer pungi drone with rhythmic hand drum",
+        "Moroccan storyteller's animated Darija narration to a crowd",
+        "Brass tea glasses clinking on hammered metal trays",
+        "Sizzling lamb fat on charcoal grill with fanning bellows",
+        "Vendor hawking spices with melodic repeated call"
+      ],
+      "sfx_prompts": [
+        "Open-air Moroccan marketplace at night with overlapping snake charmer music, crowd chatter, and sizzling food stalls",
+        "Brass tea set preparation with clinking glasses on a metal tray, pouring liquid, and background haggling in Arabic",
+        "Distant drumming circle in a busy North African plaza with shuffling feet and occasional donkey braying"
+      ],
+      "music_prompt": "Traditional Moroccan Gnawa bass lute and castanets instrumental with hypnotic repetitive rhythm evoking 1970s Marrakech street performance",
+      "category": "markets"
+    },
+    {
+      "id": "london-blitz-1940",
+      "location": "East London during the Blitz",
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "era": "1940s",
+      "difficulty": "hard",
+      "description": "Air raid sirens wail across the rooftops as anti-aircraft batteries pound the night sky. Distant explosions send tremors through Anderson shelters where families huddle, listening to the drone of Luftwaffe bombers overhead and the crackle of fires consuming row houses.",
+      "sounds": [
+        "Rising and falling air raid siren wail",
+        "Anti-aircraft gun rapid fire thumping",
+        "Distant heavy bomb explosions with ground tremor",
+        "Droning propeller engines of bomber formation overhead",
+        "Crackling structure fire with falling debris"
+      ],
+      "sfx_prompts": [
+        "World War Two air raid with wailing sirens, distant anti-aircraft gunfire, and heavy bomber drone overhead at night",
+        "Building collapse and fire crackling with falling bricks, splintering timber, and muffled shouts from a wartime city street",
+        "Underground shelter ambiance with distant muffled explosions, nervous murmuring, and a tinny radio playing BBC broadcast"
+      ],
+      "music_prompt": "Somber 1940s British wartime orchestral piece with low strings and muted brass evoking resilience during the London Blitz",
+      "category": "historical"
+    },
+    {
+      "id": "nyc-times-square-1970s",
+      "location": "Times Square, New York City",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1970s",
+      "difficulty": "easy",
+      "description": "Honking yellow cabs jostle through neon-lit gridlock while street hustlers call out to passing tourists. A boombox blasts disco from a corner as subway grates exhale warm gusts. Police sirens doppler past and the rumble of the IRT rattles underfoot.",
+      "sounds": [
+        "Yellow taxi cab honking in heavy traffic gridlock",
+        "Boombox blasting disco music from street corner",
+        "Police siren dopplering past on wet asphalt",
+        "Subway rumble vibrating through sidewalk grate",
+        "Street hustler shouting to passing pedestrians"
+      ],
+      "sfx_prompts": [
+        "Busy 1970s New York City intersection with honking taxis, police sirens, and overlapping pedestrian chatter on a rainy night",
+        "Portable boombox playing loud disco funk on a crowded sidewalk with passing footsteps and distant subway rumble below grates"
+      ],
+      "music_prompt": "Groovy 1970s disco funk instrumental with wah-wah guitar, slap bass, and string stabs evoking the golden era of Times Square nightlife",
+      "category": "city_streets"
+    },
+    {
+      "id": "amazon-rainforest-dawn-present",
+      "location": "Amazon Rainforest, Manaus Region",
+      "country": "Brazil",
+      "continent": "South America",
+      "era": "2020s",
+      "difficulty": "easy",
+      "description": "The canopy erupts at first light with a deafening chorus of howler monkeys and macaw calls. Rain drips steadily from leaves three stories up, punctuated by the crack of falling branches and the electric buzz of cicadas warming in the humid air.",
+      "sounds": [
+        "Howler monkey troupe bellowing through canopy",
+        "Scarlet macaw pairs screeching in flight",
+        "Steady rain dripping from broad tropical leaves",
+        "Cicada electric buzz rising in waves",
+        "Tree branch cracking and crashing to forest floor"
+      ],
+      "sfx_prompts": [
+        "Dense tropical rainforest at dawn with howler monkey calls, bird screeches, dripping water, and buzzing insects in humid air",
+        "Canopy layer rain dripping onto broad leaves with distant thunder rumble and frog chorus beginning at sunrise"
+      ],
+      "music_prompt": "Ambient Amazonian instrumental with breathy pan flute, gentle rainfall percussion, and layered tropical bird call samples",
+      "category": "nature"
+    },
+    {
+      "id": "mumbai-churchgate-station-2000s",
+      "location": "Churchgate Railway Station, Mumbai",
+      "country": "India",
+      "continent": "Asia",
+      "era": "2000s",
+      "difficulty": "medium",
+      "description": "Thousands of commuters surge through the terminus in a tide of humanity as local trains screech to a halt every ninety seconds. Platform vendors shout 'chai chai' above the din while the PA crackles departure announcements in Hindi and English.",
+      "sounds": [
+        "Electric commuter train screeching brakes on platform",
+        "Massive crowd footsteps rushing across stone platform",
+        "Chai vendor rhythmic shouting call through crowd",
+        "Station PA system crackling Hindi-English announcements",
+        "Metal turnstile clicking as commuters push through"
+      ],
+      "sfx_prompts": [
+        "Crowded Indian railway station with train brakes screeching, massive crowd murmur, and vendor calls echoing under a metal roof",
+        "Platform vendor shouting chai chai repeatedly in a busy train terminus with PA announcement and turnstile clicks",
+        "Train doors slamming shut with warning buzzer, followed by electric motor acceleration and crowd dispersing on platform"
+      ],
+      "music_prompt": "Energetic Bollywood-inspired instrumental with tabla, sitar accents, and driving rhythm evoking the pulse of Mumbai's railway commute",
+      "category": "transport"
+    },
+    {
+      "id": "venice-gondola-ride-1950s",
+      "location": "Grand Canal, Venice",
+      "country": "Italy",
+      "continent": "Europe",
+      "era": "1950s",
+      "difficulty": "medium",
+      "description": "The gondolier's oar creaks in its forcola as the sleek black hull glides through narrow canals, water lapping against moss-covered brick walls. Church bells from San Marco mingle with an accordion melody drifting from a trattoria terrace.",
+      "sounds": [
+        "Wooden oar creaking rhythmically in metal forcola",
+        "Water lapping against ancient brick canal walls",
+        "San Marco church bells ringing across the water",
+        "Distant accordion playing Italian folk melody",
+        "Gondola hull gently bumping wooden mooring poles"
+      ],
+      "sfx_prompts": [
+        "Venetian canal with gentle water lapping against stone walls, distant church bells, and a wooden boat gliding through calm water",
+        "Gondolier's oar creaking in rhythm with soft water splashes, echoing between narrow canal building walls in evening light"
+      ],
+      "music_prompt": "Romantic 1950s Italian instrumental with mandolin, accordion, and gentle strings evoking a twilight gondola ride through Venice canals",
+      "category": "transport"
+    },
+    {
+      "id": "berlin-wall-fall-1989",
+      "location": "Brandenburg Gate, Berlin",
+      "country": "Germany",
+      "continent": "Europe",
+      "era": "1980s",
+      "difficulty": "hard",
+      "description": "Sledgehammers ring against concrete as jubilant crowds chant 'Tor auf!' at the Brandenburg Gate. Car horns blare in celebration, champagne corks pop, and strangers embrace while David Hasselhoff's tinny voice echoes from a distant stage PA.",
+      "sounds": [
+        "Sledgehammers striking concrete wall chunks",
+        "Massive crowd chanting Tor auf in unison",
+        "Car horns blaring in continuous celebration",
+        "Champagne bottles popping and glass clinking",
+        "Distant concert PA system with crowd singing along"
+      ],
+      "sfx_prompts": [
+        "Massive outdoor celebration with thousands chanting in German, hammering on concrete, and car horns blaring at night",
+        "Concrete wall being struck with sledgehammers, chunks falling and crumbling, with cheering crowd and champagne cork pops",
+        "Euphoric street party atmosphere with distant live concert PA, fireworks, and honking car horns in a European city"
+      ],
+      "music_prompt": "Triumphant late 1980s synth-pop rock instrumental with soaring guitar and driving beat evoking German reunification celebration",
+      "category": "historical"
+    },
+    {
+      "id": "rio-carnival-2010s",
+      "location": "Sambadrome Marquês de Sapucaí, Rio de Janeiro",
+      "country": "Brazil",
+      "continent": "South America",
+      "era": "2010s",
+      "difficulty": "easy",
+      "description": "Thundering samba batucada drums shake the Sambadrome as sequined dancers shimmy past roaring grandstands. Whistles pierce the tropical night air, massive float generators hum beneath the music, and the crowd's synchronized clapping builds into ecstatic waves.",
+      "sounds": [
+        "Samba batucada drum section with surdo bass and repinique",
+        "Stadium crowd roaring and synchronized clapping",
+        "Apito samba whistle piercing through drum rhythms",
+        "Carnival float diesel generator humming underneath music",
+        "Sequined costume rattling and jingling with dance movement"
+      ],
+      "sfx_prompts": [
+        "Brazilian carnival samba parade with thundering drum batucada, crowd roaring in a stadium, and whistles piercing the tropical night",
+        "Large carnival float moving slowly with diesel generator hum, jingling costumes, and synchronized crowd clapping and chanting"
+      ],
+      "music_prompt": "High-energy samba de enredo instrumental with full bateria percussion, brass section, and soaring cavaquinho evoking Rio Carnival grandeur",
+      "category": "festivals"
+    },
+    {
+      "id": "serengeti-migration-present",
+      "location": "Serengeti National Park, Mara River Crossing",
+      "country": "Tanzania",
+      "continent": "Africa",
+      "era": "2020s",
+      "difficulty": "medium",
+      "description": "A million wildebeest thunder toward the Mara River, hooves pounding sun-baked earth into dust clouds. The lead animals plunge into churning water with desperate splashing while Rüppell's vultures circle overhead and hippos grunt territorial warnings from the shallows.",
+      "sounds": [
+        "Thousands of wildebeest hooves thundering on dry earth",
+        "Wildebeest splashing and scrambling through river crossing",
+        "Hippo territorial grunting and water blowing",
+        "Vulture wings whooshing in low circling flight",
+        "Wildebeest distress calls and grunting vocalizations"
+      ],
+      "sfx_prompts": [
+        "African savanna with massive wildebeest herd stampede, thousands of hooves thundering on dry earth creating a rumbling ground vibration",
+        "River crossing with large animals plunging into churning water, frantic splashing, distress calls, and hippo grunts from downstream",
+        "East African bush ambiance with circling vulture wing flaps, distant lion roar, and dry wind sweeping across grassland"
+      ],
+      "music_prompt": "Epic orchestral African safari instrumental with deep drums, kalimba melody, and soaring strings evoking the Serengeti great migration",
+      "category": "nature"
+    },
+    {
+      "id": "paris-metro-chatelet-1970s",
+      "location": "Châtelet Station, Paris Métro",
+      "country": "France",
+      "continent": "Europe",
+      "era": "1970s",
+      "difficulty": "medium",
+      "description": "Rubber-tired Métro trains squeal into the labyrinthine station as accordion buskers fill the tiled corridors with Piaf melodies. Turnstile gates clack in rapid succession, heels click on worn marble steps, and the whoosh of tunnel air precedes each arriving train.",
+      "sounds": [
+        "Rubber-tired Métro train squealing into station",
+        "Accordion busker playing Edith Piaf melody in corridor",
+        "Rapid turnstile gate clacking as passengers pass",
+        "High heels clicking on worn marble station steps",
+        "Tunnel air whooshing before train arrival"
+      ],
+      "sfx_prompts": [
+        "Underground Paris Métro station with rubber-tired train squealing to a stop, tunnel wind, and muffled accordion music echoing through tiled corridors",
+        "Busy subway station concourse with rapid turnstile clicks, hurried footsteps on marble, and French PA announcement echoing overhead"
+      ],
+      "music_prompt": "Nostalgic 1970s Parisian musette accordion instrumental with gentle jazz guitar accompaniment evoking underground Métro busking culture",
+      "category": "transport"
+    },
+    {
+      "id": "istanbul-grand-bazaar-1970s",
+      "location": "Grand Bazaar, Istanbul",
+      "country": "Turkey",
+      "continent": "Asia",
+      "era": "1970s",
+      "difficulty": "medium",
+      "description": "Vaulted stone ceilings amplify a symphony of copper hammer rings, haggling voices in Turkish, and the clink of çay glasses on brass saucers. Leather merchants call out to browsers while the distant call to prayer filters through from minarets above the labyrinth of covered lanes.",
+      "sounds": [
+        "Copper artisan hammering intricate patterns on plate",
+        "Animated Turkish haggling voices echoing under stone vault",
+        "Çay tea glasses clinking on small brass saucers",
+        "Leather merchant calling out to passing browsers",
+        "Distant muezzin call to prayer filtering through stone walls"
+      ],
+      "sfx_prompts": [
+        "Covered Turkish bazaar with copper hammering echoes, animated haggling voices, and tea glasses clinking under vaulted stone ceilings",
+        "Bustling indoor market corridor with leather goods merchant calling, shuffling footsteps on stone floor, and distant prayer call filtering in"
+      ],
+      "music_prompt": "Traditional Turkish instrumental with oud, kanun zither, and darbuka drum in a meditative modal progression evoking 1970s Istanbul bazaar atmosphere",
+      "category": "markets"
+    },
+    {
+      "id": "australian-outback-dawn-present",
+      "location": "Red Centre, Australian Outback",
+      "country": "Australia",
+      "continent": "Oceania",
+      "era": "2020s",
+      "difficulty": "easy",
+      "description": "Kookaburras erupt in manic laughter as the first orange light hits Uluru. Magpie warble cascades across the spinifex plain while a gentle hot wind stirs eucalyptus leaves. The vast silence between bird calls is the unmistakable signature of deep continental isolation.",
+      "sounds": [
+        "Kookaburra laughing call cascading at dawn",
+        "Magpie warbling melodic territorial song",
+        "Hot dry wind rustling through spinifex and eucalyptus",
+        "Galah cockatoo screeching flock passing overhead",
+        "Silence punctuated by distant dingo howl"
+      ],
+      "sfx_prompts": [
+        "Australian outback dawn with kookaburra laughing call, magpie warble, and hot dry wind rustling through eucalyptus in vast open landscape",
+        "Remote arid landscape with deep silence broken by cockatoo screeches, distant dingo howl, and wind sweeping across red desert plains"
+      ],
+      "music_prompt": "Atmospheric Australian instrumental with didgeridoo drone, clapsticks rhythm, and ambient wind textures evoking outback dawn at Uluru",
+      "category": "nature"
+    },
+    {
+      "id": "havana-street-life-1950s",
+      "location": "Malecón Seawall, Havana",
+      "country": "Cuba",
+      "continent": "North America",
+      "era": "1950s",
+      "difficulty": "medium",
+      "description": "Chrome-bumpered Chevrolets rumble along the Malecón as son cubano drifts from open doorways. Domino tiles slap on wooden tables in sidewalk cafes, ice clinks in mojito glasses, and the warm Caribbean breeze carries the cry of fishing boat vendors returning to shore.",
+      "sounds": [
+        "1950s American car engine rumbling on coastal road",
+        "Son cubano music with tres guitar from open window",
+        "Domino tiles slapping sharply on wooden cafe table",
+        "Ice cubes clinking in glass with liquid pouring",
+        "Fishing boat vendor shouting catch of the day from shore"
+      ],
+      "sfx_prompts": [
+        "1950s Havana street with classic American car engines rumbling past, distant Cuban son music, and domino tiles slapping on cafe tables",
+        "Caribbean coastal ambiance with warm breeze, gentle waves lapping seawall, and Cuban vendor calls mixed with vintage car horns"
+      ],
+      "music_prompt": "Classic 1950s Cuban son instrumental with tres guitar, congas, trumpet, and upright bass evoking pre-revolution Havana nightlife",
+      "category": "city_streets"
+    },
+    {
+      "id": "detroit-assembly-line-1920s",
+      "location": "Ford River Rouge Complex, Detroit",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1920s",
+      "difficulty": "hard",
+      "description": "The assembly line's rhythmic clang defines the cathedral of mass production. Pneumatic riveters stutter in sequence, molten steel pours with a roar, and the endless conveyor belt clatters beneath workers calling out in a babel of immigrant languages over the mechanical din.",
+      "sounds": [
+        "Pneumatic rivet gun stuttering in rhythmic bursts",
+        "Conveyor belt chain clattering with heavy metal parts",
+        "Molten steel pouring into mold with roaring hiss",
+        "Steam press stamping car body panels with heavy thud",
+        "Workers shouting over mechanical din in mixed languages"
+      ],
+      "sfx_prompts": [
+        "1920s industrial factory floor with pneumatic rivet guns, conveyor belt clattering, and steam press stamping heavy metal in rhythmic sequence",
+        "Massive steel foundry with molten metal pouring and roaring, workers shouting over deafening mechanical noise in a reverberant hall",
+        "Assembly line ambiance with repetitive mechanical clanging, chain drive motors humming, and distant steam whistles signaling shift change"
+      ],
+      "music_prompt": "Percussive industrial-age instrumental with rhythmic metallic clanging, mechanical patterns, and a driving pulse evoking 1920s American factory work",
+      "category": "industrial"
+    },
+    {
+      "id": "new-orleans-mardi-gras-1980s",
+      "location": "Bourbon Street, New Orleans",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1980s",
+      "difficulty": "easy",
+      "description": "Brass bands blaze through second-line parades as revelers shout 'Throw me something, mister!' from wrought-iron balconies. Beads clatter on cobblestones, zydeco accordion pumps from a side-street bar, and the sweet smell of beignets mingles with the cacophony of celebration.",
+      "sounds": [
+        "New Orleans brass band with tuba and trumpet in second line",
+        "Crowd shouting throw me something mister from balconies",
+        "Plastic bead necklaces clattering on cobblestone street",
+        "Zydeco accordion pumping from an open bar doorway",
+        "Parade float rolling on cobblestones with crowd cheering"
+      ],
+      "sfx_prompts": [
+        "Mardi Gras parade on Bourbon Street with brass band playing, crowd cheering from balconies, and beads clattering on cobblestones below",
+        "New Orleans street party with zydeco accordion music, laughter, glass clinking, and parade float creaking slowly through packed revelers"
+      ],
+      "music_prompt": "Lively 1980s New Orleans brass band instrumental with tuba, trombone, trumpet, and snare in a second-line parade rhythm",
+      "category": "festivals"
+    },
+    {
+      "id": "scottish-highlands-sheep-gathering",
+      "location": "Glen Coe, Scottish Highlands",
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "era": "2000s",
+      "difficulty": "medium",
+      "description": "A border collie's sharp bark echoes across the misty glen as a shepherd whistles precise commands. Hundreds of sheep bleat in overlapping calls, their hooves squelching through boggy moorland while a cold Highland wind howls through the mountain pass.",
+      "sounds": [
+        "Border collie sharp barking commands across glen",
+        "Shepherd's piercing two-tone whistle commands",
+        "Hundreds of sheep bleating in overlapping chorus",
+        "Hooves squelching through wet boggy moorland",
+        "Highland wind howling through narrow mountain pass"
+      ],
+      "sfx_prompts": [
+        "Scottish Highland glen with sheep flock bleating, border collie barking, and piercing shepherd whistles echoing across misty mountainside",
+        "Windy moorland with hundreds of sheep hooves squelching through boggy terrain, distant stream rushing, and cold highland gale gusting"
+      ],
+      "music_prompt": "Traditional Scottish instrumental with solo bagpipe, fiddle, and bodhran drum evoking a misty Highland morning sheep gathering in Glen Coe",
+      "category": "nature"
+    },
+    {
+      "id": "varanasi-ghats-dawn",
+      "location": "Dashashwamedh Ghat, Varanasi",
+      "country": "India",
+      "continent": "Asia",
+      "era": "2010s",
+      "difficulty": "medium",
+      "description": "Temple bells ring in cascading tones as the Ganga Aarti ceremony illuminates the ghats at dawn. Priests chant Sanskrit mantras into crackling loudspeakers while wooden rowing boats creak through the sacred river. The pyres at Manikarnika burn ceaselessly, their wood crackling above the current.",
+      "sounds": [
+        "Temple bells ringing in cascading bronze tones",
+        "Sanskrit mantra chanting through crackling loudspeaker",
+        "Wooden rowing boat oars splashing in Ganges water",
+        "Funeral pyre wood crackling and popping on the ghat",
+        "Conch shell blown in long resonant ceremonial blast"
+      ],
+      "sfx_prompts": [
+        "Sacred Indian riverside at dawn with temple bells cascading, Sanskrit chanting on loudspeakers, and wooden boats creaking through gentle water",
+        "Varanasi ghat ambiance with funeral pyre crackling, conch shell blowing, and crowd of pilgrims murmuring prayers by the river"
+      ],
+      "music_prompt": "Devotional Indian classical instrumental with sitar drone, tabla rhythm, and bansuri flute evoking the spiritual dawn ceremony at Varanasi ghats",
+      "category": "festivals"
+    },
+    {
+      "id": "beijing-hutong-1980s",
+      "location": "Nanluoguxiang Hutong, Beijing",
+      "country": "China",
+      "continent": "Asia",
+      "era": "1980s",
+      "difficulty": "hard",
+      "description": "Bicycle bells trill in constant streams through narrow hutong alleyways as a knife-sharpener's whetstone sings its distinctive pitch. Caged songbirds compete from courtyard doorways, a grandmother practices erhu by her window, and the coal briquette delivery man announces his arrival with a booming call.",
+      "sounds": [
+        "Bicycle bells trilling in narrow alleyway stream",
+        "Knife-sharpener's whetstone singing on metal blade",
+        "Caged songbird trilling from courtyard doorway",
+        "Erhu two-string fiddle playing through open window",
+        "Coal delivery man's booming announcement call"
+      ],
+      "sfx_prompts": [
+        "1980s Beijing hutong alleyway with constant bicycle bells, knife-sharpener whetstone singing, and caged songbird calls from courtyard doors",
+        "Narrow Chinese residential lane with erhu music through a window, distant vendor announcement calls, and bicycle chain clicking on cobblestones"
+      ],
+      "music_prompt": "Traditional Chinese instrumental with erhu, pipa lute, and bamboo dizi flute in a gentle pentatonic melody evoking 1980s Beijing hutong daily life",
+      "category": "city_streets"
+    },
+    {
+      "id": "apollo-11-launch-1969",
+      "location": "Kennedy Space Center, Cape Canaveral",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1960s",
+      "difficulty": "easy",
+      "description": "The Saturn V's five F-1 engines ignite with a roar that shakes the Florida swampland for miles. Mission Control's calm countdown crackles through transistor radios held by a million spectators, their collective gasp drowned by the escalating thunder of humanity's most powerful machine lifting off.",
+      "sounds": [
+        "Rocket engine ignition building from rumble to deafening roar",
+        "Mission Control countdown crackling through transistor radio",
+        "Massive crowd gasping and then cheering wildly",
+        "Rocket exhaust crackling and popping at close range",
+        "Metal launch tower groaning as clamps release"
+      ],
+      "sfx_prompts": [
+        "Rocket launch with massive engine ignition building from low rumble to overwhelming roar, ground shaking, and distant crowd cheering in awe",
+        "1960s mission control audio crackling through transistor radio with calm countdown voice and crowd murmur building to crescendo at liftoff"
+      ],
+      "music_prompt": "Majestic orchestral space-age instrumental with soaring brass fanfare, timpani rolls, and sweeping strings evoking the triumphant 1969 Apollo 11 launch",
+      "category": "historical"
+    },
+    {
+      "id": "hong-kong-victoria-harbour-1960s",
+      "location": "Victoria Harbour, Hong Kong",
+      "country": "China",
+      "continent": "Asia",
+      "era": "1960s",
+      "difficulty": "hard",
+      "description": "Sampan engines putt-putt through the harbour chop as the Star Ferry sounds its deep horn. Cargo junks creak under bamboo-matted sails while Cantonese bargaining echoes from floating fish markets. Seagulls screech over the thrum of a city building its modern skyline.",
+      "sounds": [
+        "Sampan outboard motor putt-putting through harbour chop",
+        "Star Ferry deep foghorn blast echoing across water",
+        "Bamboo sail junk creaking in harbour waves",
+        "Cantonese bargaining voices from floating fish market",
+        "Harbor water slapping against wooden boat hulls"
+      ],
+      "sfx_prompts": [
+        "Busy 1960s Asian harbour with sampan motors puttering, ferry horn blasting, and wooden boat hulls creaking in choppy harbor water",
+        "Floating fish market with animated Cantonese bargaining voices over water, seagull cries, and cargo being loaded onto wooden junks"
+      ],
+      "music_prompt": "Nostalgic 1960s Cantonese film instrumental with erhu, yangqin dulcimer, and gentle strings evoking colonial-era Hong Kong harbour life",
+      "category": "transport"
+    },
+    {
+      "id": "seville-semana-santa",
+      "location": "Calle Sierpes, Seville",
+      "country": "Spain",
+      "continent": "Europe",
+      "era": "2000s",
+      "difficulty": "hard",
+      "description": "A massive paso float bearing a gilded Virgin sways through the narrow street, carried by forty hidden costaleros whose synchronized grunts keep time. A lone saeta singer's raw flamenco wail pierces from a balcony, silencing the crowd before the solemn drumbeat resumes its funereal march.",
+      "sounds": [
+        "Costaleros grunting in unison under heavy paso float",
+        "Saeta flamenco singer wailing from iron balcony",
+        "Slow solemn military drum march in procession",
+        "Crowd hushing to silence before saeta begins",
+        "Heavy float creaking and swaying on wooden beams",
+        "Incense thurible chains swinging with metallic clink"
+      ],
+      "sfx_prompts": [
+        "Spanish Holy Week procession with slow solemn drumbeat, heavy float creaking on wooden beams, and costaleros grunting under enormous weight",
+        "Emotional flamenco saeta singing from a balcony above a hushed crowd, with incense chain clinking and distant brass funeral march"
+      ],
+      "music_prompt": "Solemn Spanish Semana Santa processional instrumental with military snare drum, mournful trumpet, and slow brass march evoking Seville Holy Week devotion",
+      "category": "festivals"
+    },
+    {
+      "id": "cairo-call-to-prayer-1970s",
+      "location": "Islamic Cairo, near Al-Azhar Mosque",
+      "country": "Egypt",
+      "continent": "Africa",
+      "era": "1970s",
+      "difficulty": "medium",
+      "description": "The muezzin's adhan echoes across a thousand minarets in overlapping waves, each voice slightly offset, creating a haunting polyphonic wash over the city. Below, donkey carts clatter on cobblestones, tea shop radios play Umm Kulthum, and pigeons scatter from rooftop coops.",
+      "sounds": [
+        "Multiple muezzin adhan calls overlapping from different minarets",
+        "Donkey cart clattering on narrow cobblestone street",
+        "Transistor radio playing Umm Kulthum vocal music",
+        "Pigeons scattering from rooftop coop with wing flutters",
+        "Tea shop copper kettle whistling on charcoal stove"
+      ],
+      "sfx_prompts": [
+        "Islamic city at prayer time with multiple overlapping muezzin calls from different minarets creating a polyphonic echo across rooftops",
+        "Narrow Egyptian street with donkey cart clattering on cobblestones, pigeon wings fluttering, and Arabic radio music from a tea shop"
+      ],
+      "music_prompt": "Traditional Egyptian instrumental with oud, nay flute, and riq tambourine in a contemplative maqam mode evoking 1970s Cairo evening tranquility",
+      "category": "city_streets"
+    },
+    {
+      "id": "lagos-danfo-bus-2000s",
+      "location": "Oshodi Bus Terminal, Lagos",
+      "country": "Nigeria",
+      "continent": "Africa",
+      "era": "2000s",
+      "difficulty": "medium",
+      "description": "Yellow danfo minibuses idle in choking exhaust as conductors lean from sliding doors barking destinations in Yoruba and pidgin English. Afrobeat pumps from competing radio systems, hawkers thread between vehicles selling plantain chips, and motorcycle okadas weave through impossible gaps.",
+      "sounds": [
+        "Danfo conductor barking destinations from sliding door",
+        "Competing car radios blasting Afrobeat music",
+        "Motorcycle okada engine buzzing between vehicles",
+        "Hawker vendor calling out snack offerings in pidgin",
+        "Diesel minibus engine idling with exhaust rattling"
+      ],
+      "sfx_prompts": [
+        "Chaotic West African bus terminal with danfo conductors shouting destinations, competing Afrobeat radios, and motorcycle engines buzzing between vehicles",
+        "Lagos traffic jam with diesel engines idling, hawker vendors calling through car windows, and honking horns in dense urban gridlock"
+      ],
+      "music_prompt": "Energetic Afrobeat instrumental with driving polyrhythmic drums, horn section stabs, and funky guitar evoking 2000s Lagos street energy",
+      "category": "transport"
+    },
+    {
+      "id": "machu-picchu-arrival",
+      "location": "Sun Gate Overlook, Machu Picchu",
+      "country": "Peru",
+      "continent": "South America",
+      "era": "2010s",
+      "difficulty": "medium",
+      "description": "Thin Andean air carries the distant wail of a quena flute as hikers catch their first glimpse from the Sun Gate. Mountain wind whistles through stone ruins while Andean condors ride thermals above. The Urubamba River roars far below in the cloud forest valley.",
+      "sounds": [
+        "Distant quena flute melody carried on mountain wind",
+        "Strong Andean wind whistling through stone ruins",
+        "Andean condor wing feathers whooshing in thermal glide",
+        "Urubamba River roaring in deep valley far below",
+        "Hikers' boots crunching on Inca stone trail steps"
+      ],
+      "sfx_prompts": [
+        "High Andean mountain pass with strong wind whistling through ancient stone ruins, distant river roaring in a deep valley, and condor wings overhead",
+        "Mountain hiking trail with boots crunching on stone steps, thin altitude wind gusting, and distant quena flute melody echoing across peaks"
+      ],
+      "music_prompt": "Atmospheric Andean instrumental with quena flute, charango, and zampoña panpipes evoking the mystical arrival at Machu Picchu through mountain mist",
+      "category": "nature"
+    },
+    {
+      "id": "bali-gamelan-ceremony-1970s",
+      "location": "Pura Besakih Temple, Bali",
+      "country": "Indonesia",
+      "continent": "Asia",
+      "era": "1970s",
+      "difficulty": "hard",
+      "description": "Bronze gamelan metallophones shimmer in interlocking kotekan patterns as temple dancers' ankle bells create a delicate counterrhythm. Incense smoke curls through frangipani-scented air while a kecak chorus of a hundred male voices builds hypnotic rhythmic chanting in the torch-lit courtyard.",
+      "sounds": [
+        "Gamelan metallophone interlocking kotekan patterns",
+        "Temple dancer ankle bells jingling in rhythmic steps",
+        "Kecak chorus of hundred male voices chanting cak",
+        "Bamboo torches crackling in temple courtyard",
+        "Incense and offering bell ringing in prayer ritual"
+      ],
+      "sfx_prompts": [
+        "Balinese temple ceremony with shimmering gamelan metallophones, kecak chorus chanting rhythmically, and ankle bells jingling in the torch-lit courtyard",
+        "Tropical temple ambiance with crackling bamboo torches, frangipani-scented breeze rustling palm fronds, and ceremonial offering bell ringing"
+      ],
+      "music_prompt": "Traditional Balinese gamelan instrumental with interlocking bronze metallophones, kendang drums, and suling bamboo flute in a ceremonial temple piece",
+      "category": "festivals"
+    },
+    {
+      "id": "woodstock-festival-1969",
+      "location": "Max Yasgur's Farm, Bethel, New York",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1960s",
+      "difficulty": "easy",
+      "description": "A wall of amplified electric guitar feeds back across muddy fields where half a million people sway in tie-dye communion. Rain patters on makeshift tarps, the crowd roars between songs, and a distant announcer warns about the brown acid over a crackling PA system.",
+      "sounds": [
+        "Electric guitar feedback and amplifier distortion on outdoor stage",
+        "Massive outdoor crowd roaring and cheering between songs",
+        "Rain pattering on makeshift plastic tarps and tents",
+        "PA system announcer crackling over festival grounds",
+        "Crowd singing along to familiar rock anthem"
+      ],
+      "sfx_prompts": [
+        "Massive 1960s outdoor rock festival with electric guitar amplifier feedback, half-million person crowd cheering, and rain on plastic tarps",
+        "Festival PA system crackling with announcer voice over distant crowd murmur, mud squelching underfoot, and acoustic guitar tuning between sets"
+      ],
+      "music_prompt": "Psychedelic 1960s rock instrumental with wah-wah electric guitar, Hammond organ, and driving drums evoking the Woodstock counterculture festival",
+      "category": "historical"
+    },
+    {
+      "id": "chernobyl-control-room-1986",
+      "location": "Chernobyl Nuclear Power Plant, Control Room 4",
+      "country": "Ukraine",
+      "continent": "Europe",
+      "era": "1980s",
+      "difficulty": "hard",
+      "description": "Alarm klaxons blare in frantic sequence as dosimeter readings click with accelerating intensity. Control panel switches are thrown with desperate urgency, steam vents roar from ruptured pipes, and shouting voices in Russian echo through the concrete corridors of the doomed reactor building.",
+      "sounds": [
+        "Nuclear plant alarm klaxon blaring in repeating sequence",
+        "Geiger counter clicking with accelerating rapid intensity",
+        "Control panel switches being thrown with metallic snaps",
+        "High-pressure steam venting from ruptured pipes",
+        "Panicked Russian voices shouting in concrete corridor"
+      ],
+      "sfx_prompts": [
+        "Nuclear power plant alarm with klaxon blaring, Geiger counter clicking rapidly, and control panel switches being thrown in panicked sequence",
+        "Industrial disaster ambiance with high-pressure steam venting, concrete structure groaning, and distant explosion rumble echoing through corridors"
+      ],
+      "music_prompt": "Tense Soviet-era orchestral instrumental with dissonant strings, pulsing electronic undertones, and ominous brass evoking 1986 Chernobyl disaster atmosphere",
+      "category": "historical"
+    },
+    {
+      "id": "ford-highland-park-assembly-1920s",
+      "location": "Ford Highland Park Plant, Detroit",
+      "country": "United States",
+      "continent": "North America",
+      "era": "1920s",
+      "difficulty": "hard",
+      "description": "The Highland Park plant's revolutionary moving assembly line clanks and whirs as Model T frames inch forward on overhead chains. Workers tighten bolts in synchronized thirty-second intervals, the paint spray booth hisses with enamel, and a steam whistle screams the noon break across Dearborn.",
+      "sounds": [
+        "Overhead chain conveyor clanking with car frames moving",
+        "Pneumatic wrench tightening bolts in rapid bursts",
+        "Paint spray booth hissing with enamel application",
+        "Factory steam whistle screaming for shift break",
+        "Metal body panels being dropped into assembly jig"
+      ],
+      "sfx_prompts": [
+        "1920s automobile assembly line with overhead chain conveyor clanking, pneumatic wrenches, and metal panels being fitted in rhythmic industrial sequence",
+        "Factory interior with paint spray booth hissing, steam whistle screaming, and workers' tools clanging in a reverberant industrial hall"
+      ],
+      "music_prompt": "Rhythmic mechanical instrumental with clanking percussion, industrial textures, and a swinging 1920s jazz undertone evoking early automotive mass production",
+      "category": "industrial"
+    },
+    {
+      "id": "new-zealand-haka-present",
+      "location": "Eden Park, Auckland",
+      "country": "New Zealand",
+      "continent": "Oceania",
+      "era": "2020s",
+      "difficulty": "easy",
+      "description": "The All Blacks form their line as fifty thousand spectators fall into electric silence. Then the leader's challenge cry shatters the hush — thighs slapped in thunderous unison, tongues extended, eyes bulging — and the stadium erupts as the ancient Maori war dance builds to its climactic stomp.",
+      "sounds": [
+        "Haka leader's guttural challenge cry in Maori",
+        "Synchronized thigh slapping in thunderous group rhythm",
+        "Heavy foot stomping on stadium turf in unison",
+        "Stadium crowd erupting in roar after haka silence",
+        "Chest beating and vocal grunts in rhythmic pattern"
+      ],
+      "sfx_prompts": [
+        "Stadium haka performance with synchronized thigh slapping, guttural Maori chanting, and heavy foot stomping on turf in powerful rhythmic unison",
+        "Fifty thousand spectators falling silent then erupting in massive roar after war dance climax with chest beating and challenge cries"
+      ],
+      "music_prompt": "Powerful Maori-inspired instrumental with deep war drums, rhythmic chanting, and pulsing bass evoking the All Blacks haka at a packed stadium",
+      "category": "festivals"
+    }
+  ]
 }
