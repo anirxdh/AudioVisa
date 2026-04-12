@@ -36,6 +36,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# generated audio (ElevenLabs output, cached locally)
+/public/audio/
+
 # vercel
 .vercel
 

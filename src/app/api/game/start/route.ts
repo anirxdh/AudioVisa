@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import { createGame, type GameRound } from "../../../../../lib/game-engine";
 import type { Scene } from "../../../../../types/scene";
 import scenesData from "../../../../../data/scenes.json";
+import { getAudioUrls } from "../../../../../lib/audio-cache";
 
 /**
  * POST /api/game/start
  *
  * Creates a new game session with 5 rounds (2 easy, 2 medium, 1 hard).
  * Returns game ID and round info WITHOUT scene answers.
+ *
+ * For each selected scene, checks if audio is cached:
+ * - If cached: includes audioUrls in response (instant playback)
+ * - If not cached: includes audioUrls as null (frontend triggers generation on demand)
  */
 export async function POST() {
   try {
@@ -22,24 +27,12 @@ export async function POST() {
 
     const game = createGame(scenes);
 
-    // Attempt to load audio URLs for each round.
-    // Audio cache may not be available yet (Phase 3 parallel work).
+    // Check audio cache for each round's scene
     const roundsForClient = await Promise.all(
       game.rounds.map(async (round: GameRound) => {
-        let audioUrls: { sfx: string[]; music: string } | null = null;
+        const audioUrls = await getAudioUrls(round.scene.id);
 
-        try {
-          // Dynamic import — audio-cache may not exist yet
-          const { getAudioUrls } = await import(
-            "../../../../../lib/audio-cache"
-          );
-          audioUrls = await getAudioUrls(round.scene.id);
-        } catch {
-          // audio-cache module not available yet — that's fine
-          audioUrls = null;
-        }
-
-        // Update the stored round with audio URLs
+        // Update the stored round with audio URLs (null if not cached)
         round.audioUrls = audioUrls;
 
         return {
