@@ -7,8 +7,8 @@
 
 ### Data Pipeline
 
-- [ ] **DATA-01**: 30 hand-curated "hero" scene descriptions with 4-6 specific sounds each, tagged with location/era/difficulty
-- [ ] **DATA-02**: 170+ AI-generated scene descriptions across 7 categories (markets, historical events, city streets, nature, industrial, festivals, transport)
+- [x] **DATA-01**: 30 hand-curated "hero" scene descriptions with 4-6 specific sounds each, tagged with location/era/difficulty
+- [x] **DATA-02**: 170+ AI-generated scene descriptions across 7 categories (markets, historical events, city streets, nature, industrial, festivals, transport)
 - [ ] **DATA-03**: All scenes embedded via OpenAI text-embedding-3-small and indexed in turbopuffer with metadata (location, country, continent, era, difficulty, sounds list)
 - [ ] **DATA-04**: Seed script that generates embeddings and upserts all scenes to turbopuffer in one run
 
@@ -83,8 +83,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 2 | Pending |
 | DATA-04 | Phase 2 | Pending |
 | AUDIO-01 | Phase 3 | Pending |

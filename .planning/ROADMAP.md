@@ -6,7 +6,7 @@
 ## Phase 1: Project Setup + Scene Dataset
 **Goal:** Next.js project scaffolded, 200+ scene descriptions written and stored as JSON
 **Requirements:** DATA-01, DATA-02
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Scaffold Next.js 15 project, define Scene type contract, create validation script
@@ -156,7 +156,7 @@ Plans:
 
 | Phase | Goal | Requirements | Dependencies |
 |-------|------|-------------|-------------|
-| 1 | Project setup + scene dataset | DATA-01, DATA-02 | None |
+| 1 | 2/2 | Complete   | 2026-04-12 |
 | 2 | Turbopuffer integration | DATA-03, DATA-04 | Phase 1 |
 | 3 | Audio generation pipeline | AUDIO-01–05 | Phase 2 |
 | 4 | Game engine + scoring | GAME-01–06 | Phase 2, 3 |
