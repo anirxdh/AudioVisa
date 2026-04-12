@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** The core game loop must work flawlessly: hear a soundscape, guess where and when, get scored.
-**Current focus:** Phase 3 complete -- ElevenLabs audio generation pipeline with caching
+**Current focus:** Phase 5 complete -- Polished frontend UI with dark theme, audio visualization, animations
 
 ## Current Phase
 
-**Phase:** 3 — Audio Generation Pipeline
+**Phase:** 5 — Frontend UI
 **Status:** Complete
 **Current Plan:** 1 of 1 (all plans complete)
-**Goal:** ElevenLabs integration that generates layered soundscapes (SFX + music) for any scene, with caching
+**Goal:** Polished, visually striking game interface suitable for hackathon demo video
 
 ## Progress
 
@@ -25,6 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - [x] Phase 2, Plan 01 executed (turbopuffer client, embeddings, search, seed script)
 - [x] Phase 4, Plan 01 executed (game engine, scoring, 4 API routes)
 - [x] Phase 3, Plan 01 executed (ElevenLabs audio generation, caching, pre-generation script)
+- [x] Phase 5, Plan 01 executed (frontend UI: landing, game play, results pages)
 
 ## Research Artifacts
 
@@ -35,10 +36,11 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 - User has ElevenLabs Scale subscription
 - turbopuffer hackathon credits ($128)
-- Tech stack: Next.js 16 + TypeScript + Tailwind v4 + App Router
+- Tech stack: Next.js 16 + TypeScript + Tailwind v4 + App Router + framer-motion
 - Embeddings: OpenAI text-embedding-3-small
 - 203 scenes total: 30 hero (hand-curated) + 173 AI-generated via gpt-4o-mini
 - Pre-generate audio for hero scenes, generate on-demand for rest
+- Frontend: Dark theme (#0a0a1a), glassmorphism cards, cyan/amber accents, CSS waveform viz
 
 ## Decisions
 
@@ -58,6 +60,10 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 - Used ReadableStream.getReader() for ElevenLabs stream consumption (web streams, not Node.js)
 - Gitignored public/audio/ to keep generated binary audio out of git
 - Pre-generate script has 1s delay between scenes for rate limiting
+- CSS animated bars for waveform viz instead of Web Audio API analyser (reliability with remote URLs)
+- sessionStorage for game results between play and results pages (no state library)
+- Inter font for bolder modern look matching design vision
+- useEffect for game initialization to avoid SSR fetch errors during prerendering
 
 ## Performance Metrics
 
@@ -68,7 +74,8 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 | 02-01      | 4min     | 3     | 5     |
 | 04-01      | 2min     | 3     | 7     |
 | 03-01      | 4min     | 4     | 6     |
+| 05-01      | 5min     | 5     | 9     |
 
 ---
-*Last updated: 2026-04-12 after 03-01 execution*
-*Last session stopped at: Completed 03-01-PLAN.md*
+*Last updated: 2026-04-12 after 05-01 execution*
+*Last session stopped at: Completed 05-01-PLAN.md*

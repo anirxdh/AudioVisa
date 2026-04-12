@@ -31,13 +31,13 @@
 
 ### User Interface
 
-- [ ] **UI-01**: Landing page with game title, "Start Game" CTA, and brief explanation of how it works
-- [ ] **UI-02**: Game screen with prominent audio player (play/pause, progress bar), waveform or audio visualization
-- [ ] **UI-03**: Guess input: location text field with country/city autocomplete + decade selector (1800s-2020s)
-- [ ] **UI-04**: Reveal screen with animated score counter, map showing guess vs correct location, and sound breakdown
-- [ ] **UI-05**: End screen with shareable result card (total score, round summaries, performance title)
-- [ ] **UI-06**: Responsive design — works on desktop and mobile browsers
-- [ ] **UI-07**: Dark theme with audio-centric visual design (waveforms, frequency visualizations, vinyl/retro aesthetic)
+- [x] **UI-01**: Landing page with game title, "Start Game" CTA, and brief explanation of how it works
+- [x] **UI-02**: Game screen with prominent audio player (play/pause, progress bar), waveform or audio visualization
+- [x] **UI-03**: Guess input: location text field with country/city autocomplete + decade selector (1800s-2020s)
+- [x] **UI-04**: Reveal screen with animated score counter, map showing guess vs correct location, and sound breakdown
+- [x] **UI-05**: End screen with shareable result card (total score, round summaries, performance title)
+- [x] **UI-06**: Responsive design — works on desktop and mobile browsers
+- [x] **UI-07**: Dark theme with audio-centric visual design (waveforms, frequency visualizations, vinyl/retro aesthetic)
 
 ### Sharing & Virality
 
@@ -98,13 +98,13 @@
 | GAME-04 | Phase 4 | Complete |
 | GAME-05 | Phase 4 | Complete |
 | GAME-06 | Phase 4 | Complete |
-| UI-01 | Phase 5 | Pending |
-| UI-02 | Phase 5 | Pending |
-| UI-03 | Phase 5 | Pending |
-| UI-04 | Phase 5 | Pending |
-| UI-05 | Phase 5 | Pending |
-| UI-06 | Phase 5 | Pending |
-| UI-07 | Phase 5 | Pending |
+| UI-01 | Phase 5 | Complete |
+| UI-02 | Phase 5 | Complete |
+| UI-03 | Phase 5 | Complete |
+| UI-04 | Phase 5 | Complete |
+| UI-05 | Phase 5 | Complete |
+| UI-06 | Phase 5 | Complete |
+| UI-07 | Phase 5 | Complete |
 | SHARE-01 | Phase 6 | Pending |
 | SHARE-02 | Phase 6 | Pending |
 | SHARE-03 | Phase 6 | Pending |

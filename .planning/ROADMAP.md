@@ -70,24 +70,10 @@ Plans:
 ## Phase 5: Frontend UI
 **Goal:** Polished, visually striking game interface suitable for hackathon demo video
 **Requirements:** UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07
+**Plans:** 1/1 plans complete
 
-### Tasks
-1. Landing page (`/app/page.tsx`): hero section with title "SoundGuessr", tagline, animated waveform background, "Start Game" button
-2. Game page (`/app/play/page.tsx`):
-   - Audio player with play/pause, waveform visualization (use wavesurfer.js or custom canvas)
-   - Round indicator (1/5, 2/5, etc.)
-   - Guess form: location autocomplete input + decade selector dropdown
-   - "Use Hint" button with penalty warning
-   - Submit button with loading state
-3. Reveal component: animated score counter (counting up), mini map showing guess pin vs correct pin, sound breakdown list, "Next Round" button
-4. End screen (`/app/results/page.tsx`):
-   - Total score with performance title
-   - Per-round breakdown (mini cards)
-   - Share button
-5. Dark theme: deep navy/black background, neon accent colors (cyan/amber for audio visualization), glassmorphism cards
-6. Audio visualization: animated waveform or frequency bars during playback
-7. Responsive: mobile-first grid, touch-friendly controls
-8. Animations: framer-motion for transitions, score reveals, round changes
+Plans:
+- [x] 05-01-PLAN.md — Landing page, game play page, results page, shared components, dark theme
 
 ### Success Criteria
 - Game is playable end-to-end in the browser
