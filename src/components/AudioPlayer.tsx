@@ -34,16 +34,30 @@ export default function AudioPlayer({
     Array.from({ length: BAR_COUNT }, () => Math.random() * 0.5 + 0.1)
   );
 
-  // Build playlist from audioUrls
+  // Build playlist from audioUrls, and hard-reset any previous playback
+  // so audio from a prior round never bleeds into the new one.
   useEffect(() => {
-    if (!audioUrls) return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.removeAttribute("src");
+      audioRef.current.load();
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+
+    if (!audioUrls) {
+      playlistRef.current = [];
+      setTotalTracks(0);
+      setCurrentTrackIndex(0);
+      setHasFinished(false);
+      setProgress(0);
+      setCurrentTrackLabel("");
+      return;
+    }
+
     const playlist: string[] = [];
-    if (audioUrls.sfx) {
-      playlist.push(...audioUrls.sfx);
-    }
-    if (audioUrls.music) {
-      playlist.push(audioUrls.music);
-    }
+    if (audioUrls.sfx) playlist.push(...audioUrls.sfx);
+    if (audioUrls.music) playlist.push(audioUrls.music);
     playlistRef.current = playlist;
     setTotalTracks(playlist.length);
     currentIndexRef.current = 0;
@@ -52,6 +66,18 @@ export default function AudioPlayer({
     setProgress(0);
     updateLabel(0, audioUrls);
   }, [audioUrls]);
+
+  // Stop playback when the component unmounts (phase transitions).
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeAttribute("src");
+        audioRef.current.load();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   function updateLabel(index: number, urls: AudioUrls | null) {
     if (!urls) return;

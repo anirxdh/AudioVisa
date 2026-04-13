@@ -9,20 +9,20 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://soundguessr.vercel.app"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://audiovisa.vercel.app"
   ),
-  title: "SoundGuessr - Guess the Sound, Find the Place",
+  title: "Audio Visa - Guess the Sound, Earn Your Stamp",
   description:
     "Can you guess where you are just by listening? AI-generated soundscapes challenge your ears. Built with turbopuffer + ElevenLabs.",
   openGraph: {
-    title: "SoundGuessr",
+    title: "Audio Visa",
     description: "Can you guess where you are just by listening?",
     type: "website",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SoundGuessr",
+    title: "Audio Visa",
     description: "Can you guess where you are just by listening?",
   },
 };

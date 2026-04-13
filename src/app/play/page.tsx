@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import AudioPlayer from "@/components/AudioPlayer";
 import ScoreDisplay from "@/components/ScoreDisplay";
@@ -45,16 +45,29 @@ interface RoundScore {
 
 type GamePhase = "loading" | "listening" | "guessing" | "revealing" | "finished";
 
-// ---- Decade options ----
+// ---- Decade options (covers every scene in the dataset: 1600s–2020s) ----
 const DECADES = [
-  "1800s", "1850s", "1900s", "1920s", "1940s", "1950s",
-  "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s",
+  "1600s", "1610s", "1620s", "1630s", "1640s", "1650s", "1660s", "1670s", "1680s", "1690s",
+  "1700s", "1710s", "1720s", "1730s", "1740s", "1750s", "1760s", "1770s", "1780s", "1790s",
+  "1800s", "1810s", "1820s", "1830s", "1840s", "1850s", "1860s", "1870s", "1880s", "1890s",
+  "1900s", "1910s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s",
+  "2000s", "2010s", "2020s",
 ];
 
 // ---- Component ----
 
 export default function PlayPage() {
+  return (
+    <Suspense fallback={null}>
+      <PlayPageInner />
+    </Suspense>
+  );
+}
+
+function PlayPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const theme = searchParams.get("theme") ?? "";
 
   // Game state
   const [gameId, setGameId] = useState<string | null>(null);
@@ -69,6 +82,7 @@ export default function PlayPage() {
   const [locationGuess, setLocationGuess] = useState("");
   const [eraGuess, setEraGuess] = useState("1990s");
   const [hintText, setHintText] = useState<string | null>(null);
+  const [hintSfxUrl, setHintSfxUrl] = useState<string | null>(null);
   const [hintUsed, setHintUsed] = useState(false);
   const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,6 +91,8 @@ export default function PlayPage() {
   ]);
   const [error, setError] = useState<string | null>(null);
   const [audioFailed, setAudioFailed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const submittedRef = useRef(false);
 
   // ---- API helpers ----
 
@@ -84,8 +100,13 @@ export default function PlayPage() {
     setPhase("loading");
     setError(null);
     setAudioFailed(false);
+    submittedRef.current = false;
     try {
-      const res = await fetch("/api/game/start", { method: "POST" });
+      const res = await fetch("/api/game/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(theme ? { theme } : {}),
+      });
       if (!res.ok) throw new Error("Failed to start game");
       const data = await res.json();
       setGameId(data.gameId);
@@ -108,6 +129,7 @@ export default function PlayPage() {
     setLocationGuess("");
     setEraGuess("1990s");
     setHintText(null);
+    setHintSfxUrl(null);
     setHintUsed(false);
     setRoundResult(null);
     setAudioFailed(false);
@@ -159,14 +181,21 @@ export default function PlayPage() {
       if (!res.ok) throw new Error("Failed to get hint");
       const data = await res.json();
       setHintText(data.textHint);
+      setHintSfxUrl(data.additionalSfxUrl ?? null);
       setHintUsed(true);
     } catch (err) {
       console.error("Hint failed:", err);
     }
   }
 
-  async function handleSubmitGuess() {
-    if (!gameId || !locationGuess.trim()) return;
+  async function handleSubmitGuess(opts?: { auto?: boolean }) {
+    if (!gameId) return;
+    // Prevent double-submission (retry after server success)
+    if (isSubmitting || roundResult || submittedRef.current) return;
+    // Manual submits require text; auto-submit on timeout sends "unknown"
+    const locationToSend = locationGuess.trim() || (opts?.auto ? "unknown" : "");
+    if (!locationToSend) return;
+    submittedRef.current = true;
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/game/guess", {
@@ -175,7 +204,7 @@ export default function PlayPage() {
         body: JSON.stringify({
           gameId,
           roundIndex: currentRound,
-          guess: { location: locationGuess.trim(), era: eraGuess },
+          guess: { location: locationToSend, era: eraGuess },
         }),
       });
       if (!res.ok) throw new Error("Failed to submit guess");
@@ -194,12 +223,15 @@ export default function PlayPage() {
     } catch (err) {
       console.error("Guess failed:", err);
       setError("Failed to submit guess. Please try again.");
+      submittedRef.current = false;
     } finally {
       setIsSubmitting(false);
     }
   }
 
   function handleNextRound() {
+    submittedRef.current = false;
+    setTimeLeft(30);
     const nextRound = currentRound + 1;
     if (nextRound >= rounds.length || roundResult?.gameStatus === "finished") {
       // Save results and go to results page
@@ -226,6 +258,52 @@ export default function PlayPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ---- Preload next round's audio while the player is on the reveal screen ----
+  useEffect(() => {
+    if (phase !== "revealing") return;
+    const next = rounds[currentRound + 1];
+    if (!next || next.audioUrls) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/audio/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sceneId: next.sceneId }),
+        });
+        if (!res.ok || cancelled) return;
+        const audioData = await res.json();
+        setRounds((prev) =>
+          prev.map((r) =>
+            r.sceneId === next.sceneId ? { ...r, audioUrls: audioData } : r
+          )
+        );
+      } catch {
+        // Best-effort — silent failure, regular on-demand flow will retry.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase, currentRound, rounds]);
+
+  // ---- Round timer: 30s during guessing phase, auto-submit on expiry ----
+  useEffect(() => {
+    if (phase !== "guessing") return;
+    setTimeLeft(30);
+    const startedAt = Date.now();
+    const tick = setInterval(() => {
+      const remaining = Math.max(0, 30 - Math.floor((Date.now() - startedAt) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(tick);
+        handleSubmitGuess({ auto: true });
+      }
+    }, 250);
+    return () => clearInterval(tick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, currentRound]);
+
   // ---- Render ----
 
   return (
@@ -237,7 +315,7 @@ export default function PlayPage() {
             className="text-2xl font-bold tracking-tight"
             style={{ color: "var(--accent-cyan)" }}
           >
-            SoundGuessr
+            Audio Visa
           </h1>
           {gameId && (
             <RoundIndicator
@@ -416,12 +494,29 @@ export default function PlayPage() {
             transition={{ duration: 0.4 }}
             className="w-full max-w-2xl flex flex-col items-center gap-6"
           >
-            <h2
-              className="text-2xl font-semibold text-center"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Where is this?
-            </h2>
+            <div className="flex flex-col items-center gap-3">
+              <h2
+                className="text-2xl font-semibold text-center"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Where is this?
+              </h2>
+              <div
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold"
+                style={{
+                  background: timeLeft <= 10 ? "rgba(255, 80, 80, 0.15)" : "rgba(0, 240, 255, 0.12)",
+                  border: `1px solid ${timeLeft <= 10 ? "rgba(255, 80, 80, 0.4)" : "rgba(0, 240, 255, 0.3)"}`,
+                  color: timeLeft <= 10 ? "var(--accent-red)" : "var(--accent-cyan)",
+                }}
+                aria-label={`${timeLeft} seconds remaining`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                {timeLeft}s
+              </div>
+            </div>
 
             {/* Mini audio player — can re-listen */}
             <div className="w-full max-w-lg">
@@ -484,14 +579,32 @@ export default function PlayPage() {
               {/* Hint */}
               {hintText && (
                 <div
-                  className="p-3 rounded-xl text-sm"
+                  className="p-3 rounded-xl text-sm flex items-center justify-between gap-3"
                   style={{
                     background: "rgba(255, 165, 0, 0.1)",
                     border: "1px solid rgba(255, 165, 0, 0.3)",
                     color: "var(--accent-amber)",
                   }}
                 >
-                  {hintText}
+                  <span>{hintText}</span>
+                  {hintSfxUrl && (
+                    <button
+                      onClick={() => {
+                        try {
+                          new Audio(hintSfxUrl).play().catch(() => {});
+                        } catch {}
+                      }}
+                      className="px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 shrink-0"
+                      style={{
+                        background: "rgba(255, 165, 0, 0.2)",
+                        color: "var(--accent-amber)",
+                      }}
+                      aria-label="Play bonus sound clue"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                      Bonus clue
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -511,7 +624,7 @@ export default function PlayPage() {
                   </button>
                 )}
                 <button
-                  onClick={handleSubmitGuess}
+                  onClick={() => handleSubmitGuess()}
                   disabled={!locationGuess.trim() || isSubmitting}
                   className="flex-1 px-4 py-3 rounded-xl text-lg font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   style={{

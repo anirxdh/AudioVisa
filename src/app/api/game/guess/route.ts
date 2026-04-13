@@ -4,10 +4,7 @@ import {
   calculateScore,
   getPerformanceRating,
 } from "../../../../../lib/game-engine";
-import {
-  generateEmbedding,
-  buildSceneEmbeddingText,
-} from "../../../../../lib/embeddings";
+import { generateEmbeddings } from "../../../../../lib/embeddings";
 
 interface GuessBody {
   gameId: string;
@@ -127,17 +124,16 @@ export async function POST(request: NextRequest) {
 
     // Use embedding-based scoring if OPENAI_API_KEY is available, else fallback
     if (process.env.OPENAI_API_KEY) {
-      // Build text representations for embedding
+      // Embed only location+country+era on both sides so the location/time
+      // signal isn't drowned by long prose in the scene description.
       const guessText = `${guess.location}, ${guess.era}`;
-      const answerText = buildSceneEmbeddingText(scene);
+      const answerText = `${scene.location}, ${scene.country}, ${scene.era}`;
 
-      // Generate embeddings in parallel
-      const [guessVector, answerVector] = await Promise.all([
-        generateEmbedding(guessText),
-        generateEmbedding(answerText),
+      const [guessVector, answerVector] = await generateEmbeddings([
+        guessText,
+        answerText,
       ]);
 
-      // Calculate score
       const result = calculateScore(guessVector, answerVector, round.hintUsed);
       score = result.score;
       distance = result.distance;

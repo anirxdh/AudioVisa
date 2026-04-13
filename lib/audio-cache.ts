@@ -1,8 +1,13 @@
 /**
- * Audio cache — stores generated audio as static files under public/audio/{sceneId}/.
+ * Audio cache — stores generated audio on disk.
  *
- * Next.js serves files from /public as static assets, so cached audio is
- * available at /audio/{sceneId}/sfx-0.mp3, /audio/{sceneId}/music.mp3, etc.
+ * Local dev: writes to /public/audio/{sceneId}/ so Next.js serves them as
+ * static assets at /audio/{sceneId}/...
+ *
+ * Vercel serverless: /public is read-only, so we write to /tmp/audio/{sceneId}/
+ * and serve the bytes through /api/audio/file/{sceneId}/{filename}.
+ * Note: /tmp is per-lambda-instance, so cache hit rate is lower on Vercel —
+ * pre-generating via scripts/pre-generate.ts is still strongly recommended.
  */
 
 import * as fs from "fs";
@@ -14,7 +19,11 @@ import { generateSoundEffect, generateMusic } from "./elevenlabs";
 // Constants
 // ---------------------------------------------------------------------------
 
-const AUDIO_DIR = path.join(process.cwd(), "public", "audio");
+const IS_SERVERLESS = !!process.env.VERCEL;
+const AUDIO_DIR = IS_SERVERLESS
+  ? path.join("/tmp", "audio")
+  : path.join(process.cwd(), "public", "audio");
+const URL_PREFIX = IS_SERVERLESS ? "/api/audio/file" : "/audio";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,8 +75,8 @@ export function getCachedAudioUrls(sceneId: string): AudioUrls | null {
   const sfx = files
     .filter((f) => f.startsWith("sfx-"))
     .sort()
-    .map((f) => `/audio/${sceneId}/${f}`);
-  const music = `/audio/${sceneId}/music.mp3`;
+    .map((f) => `${URL_PREFIX}/${sceneId}/${f}`);
+  const music = `${URL_PREFIX}/${sceneId}/music.mp3`;
 
   return { sfx, music };
 }
@@ -103,7 +112,7 @@ export async function generateAndCacheAudio(scene: Scene): Promise<AudioUrls> {
     const buffer = await generateSoundEffect(scene.sfx_prompts[i], 10);
     const filename = `sfx-${i}.mp3`;
     fs.writeFileSync(path.join(dir, filename), buffer);
-    sfxUrls.push(`/audio/${scene.id}/${filename}`);
+    sfxUrls.push(`${URL_PREFIX}/${scene.id}/${filename}`);
   }
 
   // Generate music track (30s instrumental)
@@ -112,6 +121,6 @@ export async function generateAndCacheAudio(scene: Scene): Promise<AudioUrls> {
 
   return {
     sfx: sfxUrls,
-    music: `/audio/${scene.id}/music.mp3`,
+    music: `${URL_PREFIX}/${scene.id}/music.mp3`,
   };
 }

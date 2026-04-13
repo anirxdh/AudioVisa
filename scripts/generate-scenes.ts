@@ -81,7 +81,7 @@ const CATEGORY_TARGETS: CategoryTarget[] = [
 // ---------------------------------------------------------------------------
 // System prompt
 // ---------------------------------------------------------------------------
-const SYSTEM_PROMPT = `You are an expert sound designer and cultural geographer creating scene descriptions for SoundGuessr, a game where players guess locations and eras from soundscapes.
+const SYSTEM_PROMPT = `You are an expert sound designer and cultural geographer creating scene descriptions for Audio Visa, a game where players guess locations and eras from soundscapes.
 
 ## Acoustic Fingerprint Theory
 Every scene must have layered audio that makes it identifiable:
@@ -232,7 +232,7 @@ async function main(): Promise<void> {
 
   const client = new OpenAI({ apiKey });
 
-  console.log("=== SoundGuessr Scene Generator ===\n");
+  console.log("=== Audio Visa Scene Generator ===\n");
   console.log(`Model: ${MODEL}`);
   console.log(`Batch size: ${BATCH_SIZE}`);
   console.log(`Data file: ${DATA_PATH}\n`);

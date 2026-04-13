@@ -1,5 +1,5 @@
 /**
- * Vector distance scoring utilities for SoundGuessr.
+ * Vector distance scoring utilities for Audio Visa.
  * Standalone cosine distance + score mapping — no external dependencies.
  */
 

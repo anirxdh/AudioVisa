@@ -87,7 +87,7 @@ async function main() {
   }
 
   console.log(
-    `\nDone! Successfully indexed ${totalUpserted} scenes in turbopuffer namespace "soundguessr-scenes".`
+    `\nDone! Successfully indexed ${totalUpserted} scenes in turbopuffer namespace "audiovisa-scenes".`
   );
 }
 

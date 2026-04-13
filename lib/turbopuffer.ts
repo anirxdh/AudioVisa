@@ -1,6 +1,6 @@
 import Turbopuffer from "@turbopuffer/turbopuffer";
 
-export const NAMESPACE = "soundguessr-scenes";
+export const NAMESPACE = "audiovisa-scenes";
 
 /** Lazy-initialized turbopuffer client (reads env at call time, not import time). */
 let _tpuf: Turbopuffer | null = null;

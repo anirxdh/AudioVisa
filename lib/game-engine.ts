@@ -56,15 +56,33 @@ function pickRandom<T>(arr: T[], count: number): T[] {
  * Scenes are shuffled so the player doesn't see difficulty order.
  */
 export function createGame(scenes: Scene[]): GameState {
-  const easy = scenes.filter((s) => s.difficulty === "easy");
-  const medium = scenes.filter((s) => s.difficulty === "medium");
-  const hard = scenes.filter((s) => s.difficulty === "hard");
+  if (scenes.length < 5) {
+    throw new Error(`createGame requires at least 5 scenes, got ${scenes.length}`);
+  }
 
-  const selected = [
-    ...pickRandom(easy, 2),
-    ...pickRandom(medium, 2),
-    ...pickRandom(hard, 1),
-  ];
+  let selected: Scene[];
+  if (scenes.length === 5) {
+    // Caller pre-curated exactly 5 scenes (e.g. turbopuffer theme search) —
+    // use them as-is without difficulty shaping.
+    selected = [...scenes];
+  } else {
+    const easy = scenes.filter((s) => s.difficulty === "easy");
+    const medium = scenes.filter((s) => s.difficulty === "medium");
+    const hard = scenes.filter((s) => s.difficulty === "hard");
+
+    selected = [
+      ...pickRandom(easy, 2),
+      ...pickRandom(medium, 2),
+      ...pickRandom(hard, 1),
+    ];
+
+    // Backfill if any difficulty bucket is short.
+    if (selected.length < 5) {
+      const used = new Set(selected.map((s) => s.id));
+      const remaining = scenes.filter((s) => !used.has(s.id));
+      selected.push(...pickRandom(remaining, 5 - selected.length));
+    }
+  }
 
   // Shuffle the selected scenes so difficulty order is random
   for (let i = selected.length - 1; i > 0; i--) {

@@ -2,6 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useState } from "react";
+
+const THEME_PRESETS = [
+  "Rainy streets",
+  "Coastal markets",
+  "Night city",
+  "Ancient ruins",
+  "Industrial era",
+  "Festivals",
+];
 
 const WAVE_BARS = 60;
 
@@ -32,6 +42,13 @@ function WaveformBackground() {
 
 export default function Home() {
   const router = useRouter();
+  const [theme, setTheme] = useState("");
+
+  function startGame() {
+    const trimmed = theme.trim();
+    const href = trimmed ? `/play?theme=${encodeURIComponent(trimmed)}` : "/play";
+    router.push(href);
+  }
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
@@ -49,7 +66,7 @@ export default function Home() {
             className="text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight mb-4 glow-text-cyan"
             style={{ color: "var(--accent-cyan)" }}
           >
-            SoundGuessr
+            Audio Visa
           </h1>
 
           {/* Subtitle */}
@@ -61,6 +78,53 @@ export default function Home() {
           </p>
         </motion.div>
 
+        {/* Theme input (optional — turbopuffer ANN search) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="w-full max-w-md flex flex-col items-center gap-3 mb-6"
+        >
+          <input
+            type="text"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            placeholder="Optional: pick a vibe (e.g. rainy streets)"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") startGame();
+            }}
+            className="w-full px-5 py-3 rounded-full text-center text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan transition-all"
+            style={{
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+            }}
+            aria-label="Optional theme for scene selection"
+          />
+          <div className="flex flex-wrap justify-center gap-2">
+            {THEME_PRESETS.map((preset) => {
+              const active = theme === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setTheme(active ? "" : preset)}
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer"
+                  style={{
+                    background: active ? "var(--accent-cyan)" : "rgba(255,255,255,0.08)",
+                    color: active ? "black" : "var(--text-secondary)",
+                    border: `1px solid ${active ? "var(--accent-cyan)" : "rgba(255,255,255,0.15)"}`,
+                  }}
+                >
+                  {preset}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+            Powered by <span style={{ color: "var(--accent-cyan)" }}>turbopuffer</span> vector search
+          </p>
+        </motion.div>
+
         {/* Start button */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -68,7 +132,7 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <button
-            onClick={() => router.push("/play")}
+            onClick={startGame}
             className="group relative px-10 py-4 rounded-full text-lg font-semibold text-black transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
             style={{
               background:

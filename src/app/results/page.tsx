@@ -83,7 +83,7 @@ export default function ResultsPage() {
         setSummary(summaryData);
       } catch (err) {
         console.error("Failed to fetch summary:", err);
-        // Fallback to stored data
+        // Fallback to stored data — no per-round details available
         setSummary({
           gameId: data.gameId,
           totalScore: data.totalScore,
@@ -92,7 +92,7 @@ export default function ResultsPage() {
           rounds: data.roundScores?.map(
             (rs: { score: number; maxScore: number; roundNumber: number }) => ({
               roundNumber: rs.roundNumber,
-              location: "Unknown",
+              location: `Round ${rs.roundNumber}`,
               country: "",
               era: "",
               score: rs.score || 0,
@@ -115,7 +115,7 @@ export default function ResultsPage() {
     if (!summary) return "";
 
     const lines = [
-      `\u{1F3A7} SoundGuessr - I scored ${summary.totalScore}/${summary.maxPossibleScore}!`,
+      `\u{1F3A7} Audio Visa - I scored ${summary.totalScore}/${summary.maxPossibleScore}!`,
       summary.performanceRating,
       "",
       `Play now: ${window.location.origin}`,
@@ -236,7 +236,7 @@ export default function ResultsPage() {
               </div>
               <div>
                 <p className="font-medium" style={{ color: "var(--text-primary)" }}>
-                  {round.location || "Unknown Location"}
+                  {round.location || `Round ${round.roundNumber}`}
                 </p>
                 <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
                   {round.country && `${round.country} \u00B7 `}
