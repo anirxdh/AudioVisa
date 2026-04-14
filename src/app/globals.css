@@ -1,126 +1,291 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────
+   Audio Visa Kids — Duolingo-inspired palette
+   Light, friendly, saturated primaries. Chunky 3D buttons.
+   ────────────────────────────────────────────────────────── */
+
 :root {
-  --bg-primary: #0a0a1a;
-  --bg-secondary: #12122a;
-  --bg-card: rgba(255, 255, 255, 0.05);
-  --border-card: rgba(255, 255, 255, 0.1);
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0b0;
-  --accent-cyan: #00f0ff;
-  --accent-amber: #ffa500;
-  --accent-green: #00ff88;
-  --accent-red: #ff4444;
-  --background: #0a0a1a;
-  --foreground: #ffffff;
+  /* Backgrounds */
+  --bg-page: #fffaf2;        /* warm cream — softer than pure white */
+  --bg-card: #ffffff;
+  --bg-soft: #f7f7f7;        /* input / subtle card bg */
+
+  /* Text */
+  --text-primary: #3c3c3c;   /* Duolingo 'eel' */
+  --text-secondary: #777777; /* 'wolf' */
+  --text-muted: #afafaf;     /* 'hare' */
+
+  /* Saturated primaries */
+  --kid-green:   #58cc02;
+  --kid-green-d: #58a700;    /* shadow of green (3D button) */
+  --kid-blue:    #1cb0f6;
+  --kid-blue-d:  #1899d6;
+  --kid-red:     #ff4b4b;
+  --kid-red-d:   #ea2b2b;
+  --kid-yellow:  #ffc800;
+  --kid-yellow-d:#e6b400;
+  --kid-orange:  #ff9600;
+  --kid-orange-d:#e08200;
+  --kid-purple:  #ce82ff;
+  --kid-purple-d:#b06cdb;
+
+  /* Borders */
+  --border-soft: #e5e5e5;
+  --border-card: #e5e5e5;
+
+  /* Legacy aliases so unported components keep working during the migration */
+  --accent-cyan: var(--kid-blue);
+  --accent-amber: var(--kid-yellow);
+  --accent-green: var(--kid-green);
+  --accent-red: var(--kid-red);
+  --bg-primary: var(--bg-page);
+  --bg-secondary: var(--bg-soft);
+  --foreground: var(--text-primary);
+  --background: var(--bg-page);
+  --border-card-rgba: #e5e5e5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-cyan: #00f0ff;
-  --color-amber: #ffa500;
-  --color-neon-green: #00ff88;
-  --color-neon-red: #ff4444;
-  --color-card: rgba(255, 255, 255, 0.05);
-  --color-card-border: rgba(255, 255, 255, 0.1);
-  --color-text-secondary: #a0a0b0;
+  --color-background: var(--bg-page);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-kid), "Nunito", system-ui, sans-serif;
+  --color-kid-green: #58cc02;
+  --color-kid-blue: #1cb0f6;
+  --color-kid-red: #ff4b4b;
+  --color-kid-yellow: #ffc800;
+  --color-kid-purple: #ce82ff;
+}
+
+html {
+  background: var(--bg-page); /* base color for routes without their own bg */
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: transparent; /* let fixed video background show through */
+  color: var(--text-primary);
+  font-family: var(--font-kid), "Nunito", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* Glassmorphism card */
+/* ──────────────────────────────────────────────────────────
+   Chunky 3D buttons — the signature Duolingo look
+   .kid-btn      base (the colored face)
+   colored-by    data-attribute or helper class; style inline
+   Use inline style for bg + borderBottomColor to pick color
+   ────────────────────────────────────────────────────────── */
+.kid-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  border-bottom-width: 4px;
+  cursor: pointer;
+  transition: transform 0.08s ease, filter 0.15s ease;
+  user-select: none;
+  line-height: 1;
+  color: #ffffff;
+}
+.kid-btn:hover { filter: brightness(1.03); }
+.kid-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.kid-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+/* Softer variant for secondary actions (light bg + colored text) */
+.kid-btn-soft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 2px solid var(--border-soft);
+  border-bottom-width: 4px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease;
+  color: var(--text-primary);
+}
+.kid-btn-soft:hover { background: var(--bg-soft); }
+.kid-btn-soft:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+/* Tile-style option buttons for the quiz */
+.kid-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 2px solid var(--border-soft);
+  border-bottom-width: 4px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+  min-height: 72px;
+}
+.kid-tile:hover { border-color: var(--kid-blue); }
+.kid-tile:active { transform: translateY(2px); border-bottom-width: 2px; }
+.kid-tile:disabled { cursor: not-allowed; opacity: 0.85; }
+
+/* Card used throughout the new UI — crisp, light, friendly */
+.kid-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-bottom-width: 4px;
+  border-radius: 24px;
+  padding: 1.5rem;
+}
+
+/* Back-compat: old components referencing .glass-card get kid card styling */
 .glass-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 16px;
+  border: 2px solid var(--border-card);
+  border-bottom-width: 4px;
+  border-radius: 20px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-/* Glow effects */
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
+/* Soft pill used for metadata (e.g. category) */
+.kid-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.glow-text-cyan {
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.2);
+/* ──────────────────────────────────────────────────────────
+   Premium glass card (floats over the hero video)
+   ────────────────────────────────────────────────────────── */
+.premium-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 24px 48px -20px rgba(15, 23, 42, 0.35),
+    0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
-.glow-amber {
-  box-shadow: 0 0 20px rgba(255, 165, 0, 0.3), 0 0 60px rgba(255, 165, 0, 0.1);
+.premium-card-solid {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 24px 48px -20px rgba(15, 23, 42, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
-/* Animated waveform bars for decorative background */
-@keyframes wave-bar {
-  0%, 100% { height: 20%; }
-  50% { height: 80%; }
+/* Premium button — similar chunky 3D but refined shadow stack */
+.premium-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  position: relative;
+  transition: transform 0.08s ease, filter 0.15s ease;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -4px 0 rgba(0, 0, 0, 0.2) inset,
+    0 10px 22px -6px rgba(15, 23, 42, 0.4);
+}
+.premium-btn:hover { filter: brightness(1.04); }
+.premium-btn:active { transform: translateY(2px); }
+.premium-btn:disabled { opacity: 0.55; cursor: not-allowed; filter: grayscale(0.2); }
+
+/* ──────────────────────────────────────────────────────────
+   Slow-drift keyframes for the gradient video fallback
+   ────────────────────────────────────────────────────────── */
+@keyframes drift-a {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(10vw, 8vh) scale(1.1); }
+}
+@keyframes drift-b {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-12vw, -6vh) scale(1.15); }
+}
+@keyframes drift-c {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-8vw, 10vh) scale(1.2); }
 }
 
-@keyframes wave-bar-alt {
-  0%, 100% { height: 60%; }
-  50% { height: 20%; }
-}
-
+/* ──────────────────────────────────────────────────────────
+   Keyframes / helpers kept/added
+   ────────────────────────────────────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.15); }
 }
 
-@keyframes count-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes bounce-in {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { opacity: 1; transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-4deg); }
+  75%      { transform: rotate(4deg); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+@keyframes shake-x {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+@keyframes confetti-pop {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0) scale(0.6); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--cx, 0), var(--cy, -120px), 0) rotate(var(--cr, 180deg)) scale(1); }
 }
 
-/* Waveform bar animation classes */
-.wave-bar {
-  animation: wave-bar 1.2s ease-in-out infinite;
-}
+.animate-bounce-in { animation: bounce-in 0.55s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+.animate-wiggle    { animation: wiggle 0.6s ease-in-out; }
+.animate-shake     { animation: shake-x 0.45s ease-in-out; }
 
-.wave-bar-alt {
-  animation: wave-bar-alt 1.4s ease-in-out infinite;
-}
+/* Scrollbar styling (lighter, to match the new theme) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #dcdcdc; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c5c5c5; }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* Selection color */
 ::selection {
-  background: rgba(0, 240, 255, 0.3);
-  color: white;
+  background: rgba(28, 176, 246, 0.25);
+  color: var(--text-primary);
 }

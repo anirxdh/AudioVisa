@@ -1,0 +1,554 @@
+{
+  "animals": [
+    {
+      "id": "cow",
+      "name": "Cow",
+      "emoji": "🐄",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A single cow mooing deeply in a quiet barn, realistic farm animal recording, clear and natural, 5 seconds",
+      "description": "The classic lowing moo of a dairy cow.",
+      "funFact": "Cows have best friends and their heart rate drops when they reunite."
+    },
+    {
+      "id": "pig",
+      "name": "Pig",
+      "emoji": "🐖",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A pig oinking and grunting in a pen, realistic farm animal, natural recording, 5 seconds",
+      "description": "Snuffling oinks and grunts from a contented pig.",
+      "funFact": "Pigs can recognize their own names and respond like dogs."
+    },
+    {
+      "id": "sheep",
+      "name": "Sheep",
+      "emoji": "🐑",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A sheep bleating 'baaa' in a grassy field, realistic farm animal recording, clear, 5 seconds",
+      "description": "The unmistakable bleat of a sheep calling across a pasture.",
+      "funFact": "Sheep can remember up to 50 individual faces — human or sheep — for years."
+    },
+    {
+      "id": "goat",
+      "name": "Goat",
+      "emoji": "🐐",
+      "category": "farm",
+      "difficulty": "medium",
+      "sfx_prompt": "A goat bleating with a slight warble, realistic farm animal, outdoor recording, 5 seconds",
+      "description": "The nasal, warbling bleat of a goat — sheep-like but with attitude.",
+      "funFact": "Goats have rectangular pupils that give them nearly 340° vision."
+    },
+    {
+      "id": "horse",
+      "name": "Horse",
+      "emoji": "🐎",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A horse neighing and whinnying, realistic natural recording in a stable, clear, 5 seconds",
+      "description": "A loud, ringing neigh that carries across a stable.",
+      "funFact": "Horses can read human facial expressions and remember them for months."
+    },
+    {
+      "id": "donkey",
+      "name": "Donkey",
+      "emoji": "🫏",
+      "category": "farm",
+      "difficulty": "medium",
+      "sfx_prompt": "A donkey braying loudly, 'hee-haw' call, realistic natural recording outdoors, 5 seconds",
+      "description": "The iconic hee-haw bray of a donkey.",
+      "funFact": "A donkey's bray can be heard from over 3 kilometres away."
+    },
+    {
+      "id": "rooster",
+      "name": "Rooster",
+      "emoji": "🐓",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A rooster crowing 'cock-a-doodle-doo' at dawn, realistic recording, single clear call, 5 seconds",
+      "description": "The morning crow of a rooster.",
+      "funFact": "Roosters crow in a specific order determined by their pecking hierarchy."
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken",
+      "emoji": "🐔",
+      "category": "farm",
+      "difficulty": "medium",
+      "sfx_prompt": "A hen clucking and cackling in a coop, realistic farm recording, no rooster, 5 seconds",
+      "description": "The relaxed clucking of a hen in the yard.",
+      "funFact": "Chickens have distinct alarm calls for aerial vs. ground predators."
+    },
+    {
+      "id": "duck",
+      "name": "Duck",
+      "emoji": "🦆",
+      "category": "farm",
+      "difficulty": "easy",
+      "sfx_prompt": "A mallard duck quacking near water, realistic natural recording, clear quacks, 5 seconds",
+      "description": "A string of loud, cheerful quacks.",
+      "funFact": "A duck's quack echoes — scientists just didn't believe it for years."
+    },
+    {
+      "id": "turkey",
+      "name": "Turkey",
+      "emoji": "🦃",
+      "category": "farm",
+      "difficulty": "medium",
+      "sfx_prompt": "A wild turkey gobbling loudly, realistic natural recording, clear and distinctive, 5 seconds",
+      "description": "The rolling gobble of a male turkey.",
+      "funFact": "Only male turkeys gobble. Females make a soft clucking sound."
+    },
+    {
+      "id": "dog-bark",
+      "name": "Dog (barking)",
+      "emoji": "🐕",
+      "category": "pets",
+      "difficulty": "easy",
+      "sfx_prompt": "A medium-sized dog barking energetically in a backyard, realistic recording, several clear barks, 5 seconds",
+      "description": "An enthusiastic string of barks — maybe the mailman is here.",
+      "funFact": "Dogs have over 100 distinct facial expressions."
+    },
+    {
+      "id": "dog-howl",
+      "name": "Dog (howling)",
+      "emoji": "🐶",
+      "category": "pets",
+      "difficulty": "medium",
+      "sfx_prompt": "A dog howling mournfully, long rising and falling tone, realistic recording, no barking, 5 seconds",
+      "description": "The drawn-out howl of a dog — the wolf is still in there.",
+      "funFact": "Dogs howl to mark territory and to locate their pack."
+    },
+    {
+      "id": "cat-meow",
+      "name": "Cat (meowing)",
+      "emoji": "🐱",
+      "category": "pets",
+      "difficulty": "easy",
+      "sfx_prompt": "A domestic cat meowing several times, realistic recording, clear and expressive, 5 seconds",
+      "description": "A cat demanding your attention — or dinner.",
+      "funFact": "Adult cats only meow at humans, not other cats."
+    },
+    {
+      "id": "cat-purr",
+      "name": "Cat (purring)",
+      "emoji": "😺",
+      "category": "pets",
+      "difficulty": "hard",
+      "sfx_prompt": "A cat purring deeply and steadily, close microphone recording, no meowing, 5 seconds",
+      "description": "The steady rumble of a purring cat.",
+      "funFact": "A cat's purr vibrates at frequencies that help heal bone and tissue."
+    },
+    {
+      "id": "puppy",
+      "name": "Puppy",
+      "emoji": "🐶",
+      "category": "pets",
+      "difficulty": "medium",
+      "sfx_prompt": "A small puppy yelping and whimpering, high pitched, realistic recording, 5 seconds",
+      "description": "The high-pitched yips of a young puppy.",
+      "funFact": "Puppies are born deaf — they can't hear until about three weeks old."
+    },
+    {
+      "id": "kitten",
+      "name": "Kitten",
+      "emoji": "🐈",
+      "category": "pets",
+      "difficulty": "medium",
+      "sfx_prompt": "A tiny kitten mewing softly, very high pitched tiny meows, realistic recording, 5 seconds",
+      "description": "Tiny, high-pitched mews of a kitten.",
+      "funFact": "Kittens are born blind and with their ears folded down."
+    },
+    {
+      "id": "parrot",
+      "name": "Parrot",
+      "emoji": "🦜",
+      "category": "pets",
+      "difficulty": "medium",
+      "sfx_prompt": "A colourful parrot squawking and whistling, tropical bird recording, loud clear calls, 5 seconds",
+      "description": "The bright squawks and whistles of a parrot.",
+      "funFact": "African grey parrots can learn vocabularies of over 1,000 words."
+    },
+    {
+      "id": "hamster",
+      "name": "Hamster",
+      "emoji": "🐹",
+      "category": "pets",
+      "difficulty": "hard",
+      "sfx_prompt": "A hamster squeaking softly while eating, small rodent sounds, close recording, 5 seconds",
+      "description": "The tiny squeaks and chews of a hamster at dinner.",
+      "funFact": "Hamsters can store half their body weight in food in their cheek pouches."
+    },
+    {
+      "id": "lion",
+      "name": "Lion",
+      "emoji": "🦁",
+      "category": "wild",
+      "difficulty": "easy",
+      "sfx_prompt": "A lion roaring powerfully in the savanna, low rumbling roar, realistic wildlife recording, 5 seconds",
+      "description": "The ground-shaking roar of a male lion.",
+      "funFact": "A lion's roar can be heard from up to 8 kilometres away."
+    },
+    {
+      "id": "tiger",
+      "name": "Tiger",
+      "emoji": "🐅",
+      "category": "wild",
+      "difficulty": "medium",
+      "sfx_prompt": "A tiger growling and snarling menacingly, low throaty sound, realistic big cat recording, 5 seconds",
+      "description": "The rumbling growl of a tiger on alert.",
+      "funFact": "Tigers produce infrasound growls below human hearing that can paralyze prey."
+    },
+    {
+      "id": "elephant",
+      "name": "Elephant",
+      "emoji": "🐘",
+      "category": "wild",
+      "difficulty": "easy",
+      "sfx_prompt": "An elephant trumpeting loudly, distinctive high-pitched trunk call, realistic wildlife recording, 5 seconds",
+      "description": "The piercing trumpet call of an elephant.",
+      "funFact": "Elephants communicate through low-frequency rumbles that travel through the ground."
+    },
+    {
+      "id": "grizzly-bear",
+      "name": "Grizzly Bear",
+      "emoji": "🐻",
+      "category": "wild",
+      "difficulty": "medium",
+      "sfx_prompt": "A grizzly bear growling and roaring aggressively, deep powerful bear roar, realistic wildlife, 5 seconds",
+      "description": "The deep, guttural roar of a grizzly.",
+      "funFact": "Grizzlies can run up to 35 mph — faster than any Olympic sprinter."
+    },
+    {
+      "id": "wolf",
+      "name": "Wolf",
+      "emoji": "🐺",
+      "category": "wild",
+      "difficulty": "easy",
+      "sfx_prompt": "A gray wolf howling mournfully at night, long drawn-out howl, realistic wildlife recording, 5 seconds",
+      "description": "The haunting howl of a lone wolf.",
+      "funFact": "Wolves howl in harmonies, each member singing at a different pitch."
+    },
+    {
+      "id": "fox",
+      "name": "Fox",
+      "emoji": "🦊",
+      "category": "wild",
+      "difficulty": "hard",
+      "sfx_prompt": "A red fox screaming with a high pitched eerie wail, realistic nighttime wildlife recording, 5 seconds",
+      "description": "The unsettling, almost-human scream of a red fox.",
+      "funFact": "Fox screams at night sound so human that people regularly call police."
+    },
+    {
+      "id": "deer",
+      "name": "Deer",
+      "emoji": "🦌",
+      "category": "wild",
+      "difficulty": "hard",
+      "sfx_prompt": "A deer grunting and snorting in the forest, realistic wildlife recording, no other animals, 5 seconds",
+      "description": "The soft grunts and snorts of a white-tail deer.",
+      "funFact": "Deer can hear frequencies above 30 kHz — ultrasound to us."
+    },
+    {
+      "id": "moose",
+      "name": "Moose",
+      "emoji": "🫎",
+      "category": "wild",
+      "difficulty": "hard",
+      "sfx_prompt": "A bull moose bellowing during rut season, deep grunting call, realistic wildlife recording, 5 seconds",
+      "description": "The deep bellowing grunt of a bull moose in rut.",
+      "funFact": "A bull moose bellow can shake windows from a mile away."
+    },
+    {
+      "id": "coyote",
+      "name": "Coyote",
+      "emoji": "🐺",
+      "category": "wild",
+      "difficulty": "medium",
+      "sfx_prompt": "Coyotes yipping and howling together as a pack, high pitched yodeling chorus, realistic wildlife, 5 seconds",
+      "description": "The chaotic, high-pitched chorus of a coyote pack.",
+      "funFact": "Coyotes can have over 11 distinct vocalizations — the largest repertoire of any canid."
+    },
+    {
+      "id": "hyena",
+      "name": "Hyena",
+      "emoji": "🐕",
+      "category": "wild",
+      "difficulty": "medium",
+      "sfx_prompt": "A spotted hyena laughing with its distinctive whooping call, realistic African wildlife recording, 5 seconds",
+      "description": "The eerie cackling laugh of a spotted hyena.",
+      "funFact": "Hyenas 'laugh' when they're nervous or excited — it's not humor."
+    },
+    {
+      "id": "chimpanzee",
+      "name": "Chimpanzee",
+      "emoji": "🐒",
+      "category": "wild",
+      "difficulty": "medium",
+      "sfx_prompt": "A chimpanzee hooting and screeching, pant-hoot call, realistic primate recording in jungle, 5 seconds",
+      "description": "The rising pant-hoots of a chimpanzee troop.",
+      "funFact": "Chimpanzees use over 30 distinct gestures — a proto-language."
+    },
+    {
+      "id": "leopard",
+      "name": "Leopard",
+      "emoji": "🐆",
+      "category": "wild",
+      "difficulty": "hard",
+      "sfx_prompt": "A leopard snarling and making its rasping sawing call, realistic big cat wildlife recording, 5 seconds",
+      "description": "The rasping saw-like call of a leopard.",
+      "funFact": "A leopard's call sounds like sawing wood — hence 'sawing' as its technical name."
+    },
+    {
+      "id": "bald-eagle",
+      "name": "Bald Eagle",
+      "emoji": "🦅",
+      "category": "birds",
+      "difficulty": "medium",
+      "sfx_prompt": "A bald eagle screeching with its high-pitched chirping call, realistic raptor recording outdoors, 5 seconds",
+      "description": "The sharp, chittering call of a bald eagle — smaller than you'd think.",
+      "funFact": "Hollywood always dubs bald eagle calls with red-tailed hawks. The real call is much less impressive."
+    },
+    {
+      "id": "owl",
+      "name": "Owl",
+      "emoji": "🦉",
+      "category": "birds",
+      "difficulty": "easy",
+      "sfx_prompt": "A great horned owl hooting at night, classic 'hoo-hoo' call, realistic nocturnal recording, 5 seconds",
+      "description": "The deep, classic hoo-hoo of a great horned owl.",
+      "funFact": "Owls can rotate their heads 270 degrees because they can't move their eyes."
+    },
+    {
+      "id": "crow",
+      "name": "Crow",
+      "emoji": "🐦‍⬛",
+      "category": "birds",
+      "difficulty": "easy",
+      "sfx_prompt": "A crow cawing loudly, several clear caws, realistic natural bird recording, 5 seconds",
+      "description": "The raspy caw of a crow.",
+      "funFact": "Crows can recognize individual human faces — and hold grudges."
+    },
+    {
+      "id": "woodpecker",
+      "name": "Woodpecker",
+      "emoji": "🪶",
+      "category": "birds",
+      "difficulty": "medium",
+      "sfx_prompt": "A woodpecker drumming rapidly on a tree trunk, rhythmic pecking sound, realistic forest recording, 5 seconds",
+      "description": "The rapid drumroll of a woodpecker on a tree.",
+      "funFact": "Woodpeckers hit wood at 15 mph, 20 times a second, and their brains are fine."
+    },
+    {
+      "id": "peacock",
+      "name": "Peacock",
+      "emoji": "🦚",
+      "category": "birds",
+      "difficulty": "medium",
+      "sfx_prompt": "A peacock screaming its loud piercing call, distinctive 'help help' cry, realistic recording, 5 seconds",
+      "description": "The startling, almost-human scream of a peacock.",
+      "funFact": "Peacocks 'screaming' are actually males advertising to females."
+    },
+    {
+      "id": "seagull",
+      "name": "Seagull",
+      "emoji": "🕊️",
+      "category": "birds",
+      "difficulty": "easy",
+      "sfx_prompt": "Seagulls squawking and calling near the ocean, multiple birds, realistic beach recording, 5 seconds",
+      "description": "The shrill squawks of a beach full of seagulls.",
+      "funFact": "Seagulls can drink seawater — special glands filter out the salt."
+    },
+    {
+      "id": "pigeon",
+      "name": "Pigeon",
+      "emoji": "🐦",
+      "category": "birds",
+      "difficulty": "medium",
+      "sfx_prompt": "A pigeon cooing softly in a city plaza, soft repetitive coos, realistic urban recording, 5 seconds",
+      "description": "The gentle coo-roo of a city pigeon.",
+      "funFact": "Pigeons can recognize every letter of the human alphabet."
+    },
+    {
+      "id": "hummingbird",
+      "name": "Hummingbird",
+      "emoji": "🐦",
+      "category": "birds",
+      "difficulty": "hard",
+      "sfx_prompt": "A hummingbird wings humming rapidly, high frequency buzzing of wingbeats, realistic garden recording, 5 seconds",
+      "description": "The rapid hum of hummingbird wings.",
+      "funFact": "Hummingbird wings beat up to 80 times per second."
+    },
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "emoji": "🐬",
+      "category": "ocean",
+      "difficulty": "easy",
+      "sfx_prompt": "A bottlenose dolphin clicking and whistling underwater, realistic marine mammal recording, 5 seconds",
+      "description": "The squeaky clicks and whistles of a bottlenose dolphin.",
+      "funFact": "Dolphins give each other unique 'names' — signature whistles."
+    },
+    {
+      "id": "humpback-whale",
+      "name": "Humpback Whale",
+      "emoji": "🐋",
+      "category": "ocean",
+      "difficulty": "medium",
+      "sfx_prompt": "A humpback whale singing haunting low tones underwater, realistic deep ocean recording, 5 seconds",
+      "description": "The mournful song of a humpback whale.",
+      "funFact": "Humpback songs can travel over 10,000 miles underwater."
+    },
+    {
+      "id": "orca",
+      "name": "Orca",
+      "emoji": "🐋",
+      "category": "ocean",
+      "difficulty": "hard",
+      "sfx_prompt": "An orca killer whale calling with high pitched squeaks and pulses underwater, realistic ocean recording, 5 seconds",
+      "description": "The sharp pulsed calls of an orca pod.",
+      "funFact": "Each orca pod has its own dialect — a unique set of calls."
+    },
+    {
+      "id": "seal",
+      "name": "Seal",
+      "emoji": "🦭",
+      "category": "ocean",
+      "difficulty": "medium",
+      "sfx_prompt": "A harbor seal barking and grunting on a rocky shore, realistic marine mammal recording, 5 seconds",
+      "description": "The guttural barks and grunts of a harbor seal.",
+      "funFact": "Seals can hold their breath for up to 2 hours."
+    },
+    {
+      "id": "walrus",
+      "name": "Walrus",
+      "emoji": "🦭",
+      "category": "ocean",
+      "difficulty": "hard",
+      "sfx_prompt": "A walrus making its distinctive bell-like grunting call, realistic arctic marine recording, 5 seconds",
+      "description": "The strange bell-like grunts of a walrus.",
+      "funFact": "Walruses can sleep while floating vertically in the water."
+    },
+    {
+      "id": "sea-otter",
+      "name": "Sea Otter",
+      "emoji": "🦦",
+      "category": "ocean",
+      "difficulty": "hard",
+      "sfx_prompt": "A sea otter squeaking and cooing on the water surface, high pitched mammal squeaks, realistic ocean recording, 5 seconds",
+      "description": "The high-pitched squeaks of a sea otter.",
+      "funFact": "Sea otters hold hands while they sleep so they don't drift apart."
+    },
+    {
+      "id": "rattlesnake",
+      "name": "Rattlesnake",
+      "emoji": "🐍",
+      "category": "reptiles",
+      "difficulty": "easy",
+      "sfx_prompt": "A rattlesnake rattling its tail in warning, distinctive buzzing rattle, realistic desert recording, 5 seconds",
+      "description": "The warning buzz of a coiled rattlesnake.",
+      "funFact": "Rattlesnakes grow a new rattle segment every time they shed their skin."
+    },
+    {
+      "id": "bullfrog",
+      "name": "Bullfrog",
+      "emoji": "🐸",
+      "category": "reptiles",
+      "difficulty": "medium",
+      "sfx_prompt": "An American bullfrog making its deep 'jug-o-rum' croak near a pond, realistic wetland recording, 5 seconds",
+      "description": "The deep 'jug-o-rum' call of a bullfrog.",
+      "funFact": "A bullfrog's call can be heard from nearly a mile away."
+    },
+    {
+      "id": "tree-frog",
+      "name": "Tree Frog",
+      "emoji": "🐸",
+      "category": "reptiles",
+      "difficulty": "hard",
+      "sfx_prompt": "Small tree frogs peeping and trilling in the night, high-pitched chorus, realistic forest recording, 5 seconds",
+      "description": "The high, tinkling peeps of a tree frog chorus.",
+      "funFact": "Some tree frogs can freeze solid in winter and thaw back to life in spring."
+    },
+    {
+      "id": "alligator",
+      "name": "Alligator",
+      "emoji": "🐊",
+      "category": "reptiles",
+      "difficulty": "medium",
+      "sfx_prompt": "An American alligator bellowing low and deep from a swamp, distinctive reptile roar, realistic wetland recording, 5 seconds",
+      "description": "The deep, vibrating bellow of a bull alligator.",
+      "funFact": "Alligator bellows literally make the water dance above their backs."
+    },
+    {
+      "id": "gecko",
+      "name": "Gecko",
+      "emoji": "🦎",
+      "category": "reptiles",
+      "difficulty": "hard",
+      "sfx_prompt": "A tokay gecko calling loudly, distinctive 'to-kay to-kay' barking chirp, realistic tropical recording, 5 seconds",
+      "description": "The loud 'to-kay' call of a tokay gecko.",
+      "funFact": "Tokay geckos are named onomatopoeically — they literally say 'to-kay'."
+    },
+    {
+      "id": "cricket",
+      "name": "Cricket",
+      "emoji": "🦗",
+      "category": "insects",
+      "difficulty": "easy",
+      "sfx_prompt": "Crickets chirping softly in the warm summer night, steady rhythmic chirps, realistic nature recording, 5 seconds",
+      "description": "The steady chirp of crickets at night.",
+      "funFact": "You can estimate temperature by counting cricket chirps per minute."
+    },
+    {
+      "id": "cicada",
+      "name": "Cicada",
+      "emoji": "🦗",
+      "category": "insects",
+      "difficulty": "medium",
+      "sfx_prompt": "A cicada buzzing loudly in the summer trees, high-pitched droning whine, realistic outdoor recording, 5 seconds",
+      "description": "The piercing drone of cicadas in summer trees.",
+      "funFact": "Periodical cicadas emerge exactly every 13 or 17 years, right on schedule."
+    },
+    {
+      "id": "bee",
+      "name": "Bee",
+      "emoji": "🐝",
+      "category": "insects",
+      "difficulty": "easy",
+      "sfx_prompt": "Honeybees buzzing around a hive, busy buzzing insect swarm, realistic beekeeping recording, 5 seconds",
+      "description": "The steady buzz of honeybees at work.",
+      "funFact": "A bee must visit about 2 million flowers to make one pound of honey."
+    },
+    {
+      "id": "mosquito",
+      "name": "Mosquito",
+      "emoji": "🦟",
+      "category": "insects",
+      "difficulty": "medium",
+      "sfx_prompt": "A mosquito whining with its high-pitched buzz near a microphone, classic annoying hum, realistic recording, 5 seconds",
+      "description": "The infuriating whine of a mosquito next to your ear.",
+      "funFact": "Only female mosquitoes bite — males just drink nectar."
+    },
+    {
+      "id": "grasshopper",
+      "name": "Grasshopper",
+      "emoji": "🦗",
+      "category": "insects",
+      "difficulty": "hard",
+      "sfx_prompt": "A grasshopper chirping by rubbing its legs, scratchy rhythmic insect sound, realistic meadow recording, 5 seconds",
+      "description": "The scratchy chirp of a grasshopper in dry grass.",
+      "funFact": "Grasshoppers 'sing' by rubbing a leg across their wing — called stridulation."
+    },
+    {
+      "id": "wasp",
+      "name": "Wasp",
+      "emoji": "🐝",
+      "category": "insects",
+      "difficulty": "hard",
+      "sfx_prompt": "A wasp buzzing angrily with a harsher sharper tone than a bee, realistic insect recording, 5 seconds",
+      "description": "The sharper, meaner buzz of an angry wasp.",
+      "funFact": "Unlike bees, wasps can sting multiple times — their stinger has no barbs."
+    }
+  ]
+}

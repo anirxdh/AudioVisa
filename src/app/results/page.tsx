@@ -1,171 +1,99 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import ScoreDisplay from "@/components/ScoreDisplay";
+import { getNickname } from "../../../lib/kid-storage";
 
-// ---- Types ----
-
-interface RoundSummary {
-  roundNumber: number;
-  location: string;
-  country: string;
-  era: string;
-  score: number;
-  maxScore: number;
-  hintUsed: boolean;
-  sounds: string[];
+interface Sticker {
+  animalName: string;
+  emoji: string | null;
+  correct: boolean;
+  guessed: string | null;
 }
 
-interface GameSummary {
-  gameId: string;
+interface StoredResults {
+  gameId: string | null;
+  mode: "daily" | "practice" | "challenge";
+  challengeId: string | null;
   totalScore: number;
-  maxPossibleScore: number;
-  performanceRating: string;
-  rounds: RoundSummary[];
-  status: string;
+  performanceRating: string | null;
+  stickers: Sticker[];
+  streak: number;
 }
 
-// ---- Helpers ----
-
-function getScoreEmoji(score: number, maxScore: number): string {
-  const ratio = score / maxScore;
-  if (ratio >= 0.8) return "\u{1F3AF}"; // bullseye
-  if (ratio >= 0.6) return "\u{1F525}"; // fire
-  if (ratio >= 0.4) return "\u{1F44D}"; // thumbs up
-  if (ratio >= 0.2) return "\u{1F914}"; // thinking
-  return "\u{1F30D}"; // globe
+interface LeaderboardEntry {
+  rank: number;
+  nickname: string;
+  score: number;
 }
-
-function getRatingTitle(rating: string | null): string {
-  if (!rating) return "Sound Explorer";
-  return rating;
-}
-
-function getRatingColor(totalScore: number): string {
-  if (totalScore >= 4000) return "var(--accent-green)";
-  if (totalScore >= 2500) return "var(--accent-cyan)";
-  if (totalScore >= 1500) return "var(--accent-amber)";
-  return "var(--accent-red)";
-}
-
-// ---- Component ----
 
 export default function ResultsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResultsInner />
+    </Suspense>
+  );
+}
+
+function ResultsInner() {
   const router = useRouter();
-  const [summary, setSummary] = useState<GameSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [results, setResults] = useState<StoredResults | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [rank, setRank] = useState<{ rank: number | null; total: number } | null>(null);
+  const [top3, setTop3] = useState<LeaderboardEntry[]>([]);
+  const submitGuard = useRef(false);
 
   useEffect(() => {
-    // Get game results from session storage
     const stored = sessionStorage.getItem("gameResults");
     if (!stored) {
-      // No game data — redirect to home
       router.push("/");
       return;
     }
+    const data = JSON.parse(stored) as StoredResults;
+    setResults(data);
 
-    const data = JSON.parse(stored);
-    const { gameId } = data;
-
-    // Fetch full summary from API
-    async function fetchSummary() {
-      try {
-        const res = await fetch("/api/game/summary", {
+    if (data.mode === "daily" && data.gameId && !submitGuard.current) {
+      submitGuard.current = true;
+      const nickname = getNickname();
+      if (nickname) {
+        setSubmitting(true);
+        fetch("/api/leaderboard/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ gameId }),
-        });
-        if (!res.ok) throw new Error("Failed to fetch summary");
-        const summaryData: GameSummary = await res.json();
-        setSummary(summaryData);
-      } catch (err) {
-        console.error("Failed to fetch summary:", err);
-        // Fallback to stored data — no per-round details available
-        setSummary({
-          gameId: data.gameId,
-          totalScore: data.totalScore,
-          maxPossibleScore: 5000,
-          performanceRating: data.performanceRating || "Sound Explorer",
-          rounds: data.roundScores?.map(
-            (rs: { score: number; maxScore: number; roundNumber: number }) => ({
-              roundNumber: rs.roundNumber,
-              location: `Round ${rs.roundNumber}`,
-              country: "",
-              era: "",
-              score: rs.score || 0,
-              maxScore: rs.maxScore || 1000,
-              hintUsed: false,
-              sounds: [],
-            })
-          ) || [],
-          status: "finished",
-        });
-      } finally {
-        setIsLoading(false);
+          body: JSON.stringify({ gameId: data.gameId, nickname }),
+        })
+          .then((res) => res.json())
+          .then((payload) => {
+            if (payload.submitted) {
+              setRank({ rank: payload.rank ?? null, total: payload.total ?? 0 });
+            }
+          })
+          .catch(() => {})
+          .finally(() => setSubmitting(false));
       }
+      fetch("/api/leaderboard/today")
+        .then((res) => res.json())
+        .then((payload) => {
+          if (Array.isArray(payload.entries)) {
+            setTop3(payload.entries.slice(0, 3));
+          }
+        })
+        .catch(() => {});
     }
-
-    fetchSummary();
   }, [router]);
 
-  function getShareText(): string {
-    if (!summary) return "";
-
-    const lines = [
-      `\u{1F3A7} Audio Visa - I scored ${summary.totalScore}/${summary.maxPossibleScore}!`,
-      summary.performanceRating,
-      "",
-      `Play now: ${window.location.origin}`,
-      "",
-      "#ElevenHacks @turbopuffer @elevenlabsio",
-    ];
-
-    return lines.join("\n");
-  }
-
-  async function handleCopyShare() {
-    if (!summary) return;
-
-    const text = getShareText();
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback for clipboard
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }
-
-  function handleShareTwitter() {
-    if (!summary) return;
-    const text = getShareText();
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-
-  if (isLoading) {
+  if (!results) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="flex gap-2">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-3 h-3 rounded-full"
+              className="w-4 h-4 rounded-full"
               style={{
-                background: "var(--accent-cyan)",
-                animation: `pulse-glow 1s ease-in-out ${i * 0.2}s infinite`,
+                background: "var(--kid-blue)",
+                animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
               }}
             />
           ))}
@@ -174,166 +102,283 @@ export default function ResultsPage() {
     );
   }
 
-  if (!summary) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p style={{ color: "var(--text-secondary)" }}>No game data found.</p>
-      </main>
-    );
-  }
+  const correctCount = results.stickers.filter((s) => s.correct).length;
+  const total = results.stickers.length;
+  const allRight = correctCount === total;
+  const headline = allRight
+    ? "Amazing! 🎉"
+    : correctCount > 0
+    ? "Great job!"
+    : "Nice try!";
+  const headlineColor = allRight
+    ? "var(--kid-green)"
+    : correctCount > 0
+    ? "var(--kid-blue)"
+    : "var(--kid-orange)";
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-8">
-      {/* Performance title */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-2"
-      >
-        <h1
-          className="text-4xl sm:text-5xl font-bold tracking-tight"
-          style={{ color: getRatingColor(summary.totalScore) }}
-        >
-          {getRatingTitle(summary.performanceRating)}
-        </h1>
-      </motion.div>
+    <main className="min-h-screen flex flex-col items-center px-5 py-8">
+      {allRight && <Confetti />}
 
-      {/* Total score */}
+      {/* Headline */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="mb-8"
+        transition={{ duration: 0.5, type: "spring" }}
+        className="text-center mb-2"
       >
-        <ScoreDisplay
-          score={summary.totalScore}
-          maxScore={summary.maxPossibleScore}
-          animate={true}
-          size="lg"
-        />
+        <div className="text-7xl sm:text-8xl animate-bounce-in">
+          {allRight ? "🏆" : correctCount > 0 ? "⭐" : "🌱"}
+        </div>
+        <h1
+          className="text-4xl sm:text-5xl font-black mt-3"
+          style={{ color: headlineColor }}
+        >
+          {headline}
+        </h1>
+        <p className="text-base sm:text-lg font-bold mt-2" style={{ color: "var(--text-secondary)" }}>
+          You got {correctCount} of {total} right!
+        </p>
       </motion.div>
 
-      {/* Round cards */}
-      <div className="w-full max-w-lg space-y-3 mb-8">
-        {summary.rounds.map((round, i) => (
-          <motion.div
-            key={round.roundNumber}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
-            className="glass-card p-4 flex items-center justify-between"
+      {/* Streak + rank strip (daily only) */}
+      {results.mode === "daily" && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+          className="mt-5 w-full max-w-md grid grid-cols-2 gap-3"
+        >
+          <div
+            className="rounded-2xl p-4 bg-white flex items-center gap-3"
+            style={{
+              border: "3px solid var(--kid-orange)",
+              borderBottomWidth: "5px",
+              borderBottomColor: "var(--kid-orange-d)",
+            }}
           >
-            <div className="flex items-center gap-4">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  color: "var(--text-primary)",
-                }}
-              >
-                {round.roundNumber}
+            <span className="text-3xl">🔥</span>
+            <div>
+              <div className="text-lg font-black leading-none" style={{ color: "var(--kid-orange)" }}>
+                {results.streak}-day
               </div>
-              <div>
-                <p className="font-medium" style={{ color: "var(--text-primary)" }}>
-                  {round.location || `Round ${round.roundNumber}`}
-                </p>
-                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  {round.country && `${round.country} \u00B7 `}
-                  {round.era}
-                  {round.hintUsed && (
-                    <span style={{ color: "var(--accent-amber)" }}>
-                      {" "}
-                      (hint used)
-                    </span>
-                  )}
-                </p>
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                streak
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                {getScoreEmoji(round.score, round.maxScore)}
+          </div>
+          <div
+            className="rounded-2xl p-4 bg-white flex items-center gap-3"
+            style={{
+              border: "3px solid var(--kid-yellow)",
+              borderBottomWidth: "5px",
+              borderBottomColor: "var(--kid-yellow-d)",
+            }}
+          >
+            <span className="text-3xl">🏆</span>
+            <div className="flex-1 min-w-0">
+              {submitting ? (
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      background: "var(--kid-yellow)",
+                      animation: "pulse-glow 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span className="text-xs font-bold uppercase" style={{ color: "var(--text-muted)" }}>
+                    Submitting...
+                  </span>
+                </div>
+              ) : rank?.rank != null ? (
+                <>
+                  <div className="text-lg font-black leading-none" style={{ color: "var(--kid-yellow)" }}>
+                    #{rank.rank}
+                  </div>
+                  <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    of {rank.total} today
+                  </div>
+                </>
+              ) : (
+                <div className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>
+                  Type your name on home to rank
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Sticker book */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+        className="mt-6 mb-6"
+      >
+        <p
+          className="text-xs font-black uppercase tracking-widest mb-3 text-center"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          Your Sticker Book
+        </p>
+        <div className="flex gap-3 justify-center flex-wrap">
+          {results.stickers.map((sticker, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, rotate: -8, scale: 0.8 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              transition={{ duration: 0.45, delay: 0.45 + i * 0.15, type: "spring" }}
+              className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl flex flex-col items-center justify-center gap-1 p-2"
+              style={{
+                background: sticker.correct ? "#fffaf0" : "#f5f5f5",
+                border: `3px solid ${
+                  sticker.correct ? "var(--kid-yellow)" : "#d9d9d9"
+                }`,
+                borderBottomWidth: "6px",
+                borderBottomColor: sticker.correct
+                  ? "var(--kid-yellow-d)"
+                  : "#c5c5c5",
+                filter: sticker.correct ? "none" : "grayscale(0.7)",
+              }}
+            >
+              <span className="text-4xl sm:text-5xl">
+                {sticker.emoji ?? "🐾"}
               </span>
-              <ScoreDisplay
-                score={round.score}
-                maxScore={round.maxScore}
-                animate={false}
-                size="sm"
-              />
-            </div>
-          </motion.div>
-        ))}
-      </div>
+              <span
+                className="text-xs font-black text-center leading-tight"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {sticker.animalName}
+              </span>
+              {sticker.correct ? (
+                <span className="text-xs font-black" style={{ color: "var(--kid-green)" }}>
+                  ✓
+                </span>
+              ) : (
+                <span className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>
+                  missed
+                </span>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Top 3 preview (daily only) */}
+      {results.mode === "daily" && top3.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.55 }}
+          className="w-full max-w-md mb-6 rounded-2xl p-4 bg-white"
+          style={{
+            border: "2px solid var(--border-soft)",
+            borderBottomWidth: "4px",
+            borderBottomColor: "#d9d9d9",
+          }}
+        >
+          <p
+            className="text-xs font-black uppercase tracking-widest mb-2 text-center"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Top 3 Today
+          </p>
+          <div className="space-y-1.5">
+            {top3.map((entry) => {
+              const medal =
+                entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉";
+              return (
+                <div
+                  key={`${entry.rank}-${entry.nickname}`}
+                  className="flex items-center justify-between text-sm font-bold"
+                >
+                  <span style={{ color: "var(--text-primary)" }}>
+                    {medal} {entry.nickname}
+                  </span>
+                  <span style={{ color: "var(--kid-blue)" }}>{entry.score}</span>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.8 }}
-        className="flex flex-col gap-3 w-full max-w-lg"
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="w-full max-w-sm flex flex-col gap-3"
       >
-        {/* Share row */}
-        <div className="flex gap-3">
-          <button
-            onClick={handleShareTwitter}
-            className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-            style={{
-              background: "rgba(29, 161, 242, 0.15)",
-              border: "1px solid rgba(29, 161, 242, 0.4)",
-              color: "#1da1f2",
-            }}
-          >
-            Share on X
-          </button>
-          <button
-            onClick={handleCopyShare}
-            className="flex-1 px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-            style={{
-              background: copied
-                ? "var(--accent-green)"
-                : "rgba(255, 255, 255, 0.1)",
-              border: `1px solid ${
-                copied ? "var(--accent-green)" : "rgba(255, 255, 255, 0.2)"
-              }`,
-              color: copied ? "black" : "var(--text-primary)",
-            }}
-          >
-            {copied ? "Copied!" : "Copy Results"}
-          </button>
-        </div>
-        {/* Play Again */}
         <button
           onClick={() => {
             sessionStorage.removeItem("gameResults");
-            router.push("/play");
+            router.push("/play?mode=practice");
           }}
-          className="w-full px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+          className="kid-btn text-lg"
           style={{
-            background:
-              "linear-gradient(135deg, var(--accent-cyan), #00c4ff)",
-            color: "black",
-            boxShadow: "0 0 30px rgba(0, 240, 255, 0.3)",
+            background: "var(--kid-green)",
+            borderBottomColor: "var(--kid-green-d)",
+            padding: "1rem 1.5rem",
           }}
         >
-          Play Again
+          Play again 🎧
         </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push("/leaderboard")}
+            className="kid-btn-soft flex-1"
+            style={{ padding: "0.85rem 1rem" }}
+          >
+            🏆 Leaderboard
+          </button>
+          <button
+            onClick={() => {
+              sessionStorage.removeItem("gameResults");
+              router.push("/");
+            }}
+            className="kid-btn-soft flex-1"
+            style={{ padding: "0.85rem 1rem" }}
+          >
+            🏠 Home
+          </button>
+        </div>
       </motion.div>
-
-      {/* Footer */}
-      <motion.footer
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 1.0 }}
-        className="mt-12 text-center"
-      >
-        <button
-          onClick={() => router.push("/")}
-          className="text-sm transition-colors cursor-pointer"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Back to Home
-        </button>
-      </motion.footer>
     </main>
+  );
+}
+
+function Confetti() {
+  const emojis = ["🎉", "🌟", "✨", "🎊", "⭐", "🌈", "🎈"];
+  const pieces = Array.from({ length: 24 }, (_, i) => i);
+  return (
+    <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+      {pieces.map((i) => {
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.6;
+        const dur = 1.4 + Math.random() * 1.2;
+        const emoji = emojis[i % emojis.length];
+        const cx = (Math.random() - 0.5) * 300;
+        const cy = -200 - Math.random() * 300;
+        const cr = (Math.random() - 0.5) * 720;
+        return (
+          <span
+            key={i}
+            className="absolute text-3xl"
+            style={{
+              left: `${left}%`,
+              bottom: "0%",
+              animation: `confetti-pop ${dur}s ${delay}s ease-out both`,
+              ["--cx" as string]: `${cx}px`,
+              ["--cy" as string]: `${cy}px`,
+              ["--cr" as string]: `${cr}deg`,
+            }}
+          >
+            {emoji}
+          </span>
+        );
+      })}
+    </div>
   );
 }

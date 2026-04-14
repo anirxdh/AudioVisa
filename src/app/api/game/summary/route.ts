@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { gameStore, getPerformanceRating } from "../../../../../lib/game-engine";
+import {
+  gameStore,
+  getPerformanceRating,
+} from "../../../../../lib/game-engine";
 
 interface SummaryBody {
   gameId: string;
@@ -9,7 +12,7 @@ interface SummaryBody {
  * POST /api/game/summary
  *
  * Returns the end-of-game summary: total score, per-round breakdown,
- * and performance rating.
+ * performance rating.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -25,39 +28,28 @@ export async function POST(request: NextRequest) {
 
     const game = gameStore.get(gameId);
     if (!game) {
-      return NextResponse.json(
-        { error: "Game not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    // Calculate total from stored rounds (in case called before finish)
-    const totalScore = game.rounds.reduce(
-      (sum, r) => sum + (r.score ?? 0),
-      0
-    );
+    const totalScore = game.rounds.reduce((sum, r) => sum + (r.score ?? 0), 0);
     const performanceRating = getPerformanceRating(totalScore);
-
-    // Update game state
     game.totalScore = totalScore;
     game.performanceRating = performanceRating;
 
     const rounds = game.rounds.map((round) => ({
       roundNumber: round.roundNumber,
-      sceneId: round.scene.id,
-      location: round.scene.location,
-      country: round.scene.country,
-      era: round.scene.era,
-      difficulty: round.scene.difficulty,
+      animalId: round.animal.id,
+      animalName: round.animal.name,
+      emoji: round.animal.emoji,
+      category: round.animal.category,
       guess: round.guess,
+      correct: round.correct,
       score: round.score ?? 0,
-      maxScore: round.maxScore,
-      hintUsed: round.hintUsed,
-      sounds: round.scene.sounds,
     }));
 
     return NextResponse.json({
       gameId: game.id,
+      mode: game.mode,
       totalScore,
       maxPossibleScore: 5000,
       performanceRating,

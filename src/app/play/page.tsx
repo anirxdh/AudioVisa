@@ -3,58 +3,44 @@
 import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import AudioPlayer from "@/components/AudioPlayer";
-import ScoreDisplay from "@/components/ScoreDisplay";
-import RoundIndicator from "@/components/RoundIndicator";
+import { addSticker, bumpStreak, markDailyPlayed } from "../../../lib/kid-storage";
 
-// ---- Types ----
+const ROUNDS_PER_GAME = 3;
+const REVEAL_MS = 2200;
 
-interface AudioUrls {
-  sfx: string[];
-  music: string;
-}
-
-interface GameRound {
+interface Round {
   roundNumber: number;
-  sceneId: string;
-  audioUrls: AudioUrls | null;
+  animalId: string;
+  audioUrl: string | null;
+  options: string[];
 }
 
 interface CorrectAnswer {
-  location: string;
-  country: string;
-  continent: string;
-  era: string;
+  id: string;
+  name: string;
+  emoji: string;
+  category: string;
   description: string;
-  sounds: string[];
+  funFact: string;
 }
 
 interface RoundResult {
   score: number;
-  maxScore: number;
+  correct: boolean;
   correctAnswer: CorrectAnswer;
   totalScore: number;
   gameStatus: string;
   performanceRating: string | null;
 }
 
-interface RoundScore {
-  score: number;
-  maxScore: number;
+interface StickerEntry {
+  animalName: string;
+  emoji: string | null;
+  correct: boolean;
+  guessed: string | null;
 }
 
-type GamePhase = "loading" | "listening" | "guessing" | "revealing" | "finished";
-
-// ---- Decade options (covers every scene in the dataset: 1600s–2020s) ----
-const DECADES = [
-  "1600s", "1610s", "1620s", "1630s", "1640s", "1650s", "1660s", "1670s", "1680s", "1690s",
-  "1700s", "1710s", "1720s", "1730s", "1740s", "1750s", "1760s", "1770s", "1780s", "1790s",
-  "1800s", "1810s", "1820s", "1830s", "1840s", "1850s", "1860s", "1870s", "1880s", "1890s",
-  "1900s", "1910s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s",
-  "2000s", "2010s", "2020s",
-];
-
-// ---- Component ----
+type Mode = "daily" | "practice" | "challenge";
 
 export default function PlayPage() {
   return (
@@ -67,316 +53,281 @@ export default function PlayPage() {
 function PlayPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const theme = searchParams.get("theme") ?? "";
+  const modeParam = searchParams.get("mode");
+  const challengeId = searchParams.get("challenge");
+  const mode: Mode = challengeId
+    ? "challenge"
+    : modeParam === "practice"
+    ? "practice"
+    : "daily";
 
-  // Game state
   const [gameId, setGameId] = useState<string | null>(null);
-  const [rounds, setRounds] = useState<GameRound[]>([]);
+  const [rounds, setRounds] = useState<Round[]>([]);
   const [currentRound, setCurrentRound] = useState(0);
-  const [phase, setPhase] = useState<GamePhase>("loading");
-  const [totalScore, setTotalScore] = useState(0);
+  const [phase, setPhase] = useState<"loading" | "playing" | "done">("loading");
 
-  // Round state
-  const [currentAudioUrls, setCurrentAudioUrls] = useState<AudioUrls | null>(null);
-  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
-  const [locationGuess, setLocationGuess] = useState("");
-  const [eraGuess, setEraGuess] = useState("1990s");
-  const [hintText, setHintText] = useState<string | null>(null);
-  const [hintSfxUrl, setHintSfxUrl] = useState<string | null>(null);
-  const [hintUsed, setHintUsed] = useState(false);
-  const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [roundScores, setRoundScores] = useState<(RoundScore | null)[]>([
-    null, null, null, null, null,
-  ]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const [pickedOption, setPickedOption] = useState<string | null>(null);
+  const [revealData, setRevealData] = useState<RoundResult | null>(null);
+  const [stickers, setStickers] = useState<StickerEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [audioFailed, setAudioFailed] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const submittedRef = useRef(false);
+  const submitLockRef = useRef(false);
 
-  // ---- API helpers ----
-
+  // ─── Start game ────────────────────────────────────────
   const startGame = useCallback(async () => {
-    setPhase("loading");
     setError(null);
-    setAudioFailed(false);
-    submittedRef.current = false;
+    setPhase("loading");
     try {
       const res = await fetch("/api/game/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(theme ? { theme } : {}),
+        body: JSON.stringify({ mode, challengeId }),
       });
-      if (!res.ok) throw new Error("Failed to start game");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to start");
+      }
       const data = await res.json();
       setGameId(data.gameId);
       setRounds(data.rounds);
       setCurrentRound(0);
-      setTotalScore(0);
-      setRoundScores([null, null, null, null, null]);
-
-      // Transition to listening, load audio for first round
-      await loadAudioForRound(data.rounds[0], data.gameId);
+      setStickers([]);
+      await loadAudio(data.rounds[0]);
+      setPhase("playing");
     } catch (err) {
-      setPhase("loading");
-      setError("Failed to start game. Please try again.");
       console.error(err);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
-  }, []);
-
-  async function loadAudioForRound(round: GameRound, gId?: string) {
-    setCurrentAudioUrls(null);
-    setLocationGuess("");
-    setEraGuess("1990s");
-    setHintText(null);
-    setHintSfxUrl(null);
-    setHintUsed(false);
-    setRoundResult(null);
-    setAudioFailed(false);
-    setError(null);
-
-    if (round.audioUrls) {
-      setCurrentAudioUrls(round.audioUrls);
-      setPhase("listening");
-      return;
-    }
-
-    // Generate audio on demand
-    setIsGeneratingAudio(true);
-    setPhase("listening");
-    try {
-      const res = await fetch("/api/audio/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sceneId: round.sceneId }),
-      });
-      if (!res.ok) throw new Error("Failed to generate audio");
-      const audioData = await res.json();
-      setCurrentAudioUrls(audioData);
-
-      // Update the round in state
-      setRounds((prev) =>
-        prev.map((r) =>
-          r.sceneId === round.sceneId ? { ...r, audioUrls: audioData } : r
-        )
-      );
-    } catch (err) {
-      console.error("Audio generation failed:", err);
-      // Mark audio as failed — user can skip to guessing
-      setCurrentAudioUrls(null);
-      setAudioFailed(true);
-    } finally {
-      setIsGeneratingAudio(false);
-    }
-  }
-
-  async function handleUseHint() {
-    if (!gameId || hintUsed) return;
-    try {
-      const res = await fetch("/api/game/hint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId, roundIndex: currentRound }),
-      });
-      if (!res.ok) throw new Error("Failed to get hint");
-      const data = await res.json();
-      setHintText(data.textHint);
-      setHintSfxUrl(data.additionalSfxUrl ?? null);
-      setHintUsed(true);
-    } catch (err) {
-      console.error("Hint failed:", err);
-    }
-  }
-
-  async function handleSubmitGuess(opts?: { auto?: boolean }) {
-    if (!gameId) return;
-    // Prevent double-submission (retry after server success)
-    if (isSubmitting || roundResult || submittedRef.current) return;
-    // Manual submits require text; auto-submit on timeout sends "unknown"
-    const locationToSend = locationGuess.trim() || (opts?.auto ? "unknown" : "");
-    if (!locationToSend) return;
-    submittedRef.current = true;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch("/api/game/guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          gameId,
-          roundIndex: currentRound,
-          guess: { location: locationToSend, era: eraGuess },
-        }),
-      });
-      if (!res.ok) throw new Error("Failed to submit guess");
-      const data: RoundResult = await res.json();
-      setRoundResult(data);
-      setTotalScore(data.totalScore);
-
-      // Update round scores
-      setRoundScores((prev) => {
-        const next = [...prev];
-        next[currentRound] = { score: data.score, maxScore: data.maxScore };
-        return next;
-      });
-
-      setPhase("revealing");
-    } catch (err) {
-      console.error("Guess failed:", err);
-      setError("Failed to submit guess. Please try again.");
-      submittedRef.current = false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function handleNextRound() {
-    submittedRef.current = false;
-    setTimeLeft(30);
-    const nextRound = currentRound + 1;
-    if (nextRound >= rounds.length || roundResult?.gameStatus === "finished") {
-      // Save results and go to results page
-      const resultsData = {
-        gameId,
-        totalScore: roundResult?.totalScore ?? totalScore,
-        performanceRating: roundResult?.performanceRating,
-        roundScores: roundScores.map((rs, i) => ({
-          ...rs,
-          roundNumber: i + 1,
-        })),
-      };
-      sessionStorage.setItem("gameResults", JSON.stringify(resultsData));
-      router.push("/results");
-      return;
-    }
-    setCurrentRound(nextRound);
-    loadAudioForRound(rounds[nextRound]);
-  }
-
-  // ---- Start game on mount ----
-  useEffect(() => {
-    startGame();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mode, challengeId]);
 
-  // ---- Preload next round's audio while the player is on the reveal screen ----
+  async function loadAudio(round: Round) {
+    setAudioUrl(null);
+    setAudioError(false);
+    setIsGenerating(!round.audioUrl);
+    try {
+      if (round.audioUrl) {
+        setAudioUrl(round.audioUrl);
+      } else {
+        const res = await fetch("/api/animal/audio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ animalId: round.animalId }),
+        });
+        if (!res.ok) throw new Error("audio fetch failed");
+        const data = await res.json();
+        setAudioUrl(data.audioUrl);
+        setRounds((prev) =>
+          prev.map((r) =>
+            r.animalId === round.animalId ? { ...r, audioUrl: data.audioUrl } : r
+          )
+        );
+      }
+    } catch {
+      setAudioError(true);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  function stopAudio() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+  }
+
+  function playAudio() {
+    if (!audioUrl) return;
+    if (!audioRef.current || audioRef.current.src !== audioUrl) {
+      if (audioRef.current) audioRef.current.pause();
+      const a = new Audio(audioUrl);
+      a.addEventListener("ended", () => setIsPlaying(false));
+      a.addEventListener("error", () => {
+        setAudioError(true);
+        setIsPlaying(false);
+      });
+      audioRef.current = a;
+    }
+    const promise = audioRef.current.play();
+    setIsPlaying(true);
+    if (promise && typeof promise.catch === "function") {
+      promise.catch(() => {
+        setIsPlaying(false); // autoplay blocked; user taps to play
+      });
+    }
+  }
+
+  // Auto-play the current round's sound once the URL arrives
   useEffect(() => {
-    if (phase !== "revealing") return;
+    if (audioUrl) playAudio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioUrl]);
+
+  // Preload the next round's audio while the user is revealing
+  useEffect(() => {
+    if (!revealData) return;
     const next = rounds[currentRound + 1];
-    if (!next || next.audioUrls) return;
+    if (!next || next.audioUrl) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/audio/generate", {
+        const res = await fetch("/api/animal/audio", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sceneId: next.sceneId }),
+          body: JSON.stringify({ animalId: next.animalId }),
         });
         if (!res.ok || cancelled) return;
-        const audioData = await res.json();
+        const data = await res.json();
         setRounds((prev) =>
           prev.map((r) =>
-            r.sceneId === next.sceneId ? { ...r, audioUrls: audioData } : r
+            r.animalId === next.animalId ? { ...r, audioUrl: data.audioUrl } : r
           )
         );
       } catch {
-        // Best-effort — silent failure, regular on-demand flow will retry.
+        // silent
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [phase, currentRound, rounds]);
+  }, [revealData, rounds, currentRound]);
 
-  // ---- Round timer: 30s during guessing phase, auto-submit on expiry ----
-  useEffect(() => {
-    if (phase !== "guessing") return;
-    setTimeLeft(30);
-    const startedAt = Date.now();
-    const tick = setInterval(() => {
-      const remaining = Math.max(0, 30 - Math.floor((Date.now() - startedAt) / 1000));
-      setTimeLeft(remaining);
-      if (remaining <= 0) {
-        clearInterval(tick);
-        handleSubmitGuess({ auto: true });
+  // ─── Pick an animal ────────────────────────────────────
+  async function handlePick(option: string) {
+    if (!gameId || pickedOption || submitLockRef.current) return;
+    submitLockRef.current = true;
+    setPickedOption(option);
+    stopAudio();
+    try {
+      const res = await fetch("/api/game/guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId, roundIndex: currentRound, guess: option }),
+      });
+      if (!res.ok) throw new Error("submit failed");
+      const data: RoundResult = await res.json();
+      setRevealData(data);
+
+      // Persistent sticker collection — only on correct
+      if (data.correct) {
+        addSticker(data.correctAnswer.id);
       }
-    }, 250);
-    return () => clearInterval(tick);
+
+      // Record sticker
+      setStickers((prev) => [
+        ...prev,
+        {
+          animalName: data.correctAnswer.name,
+          emoji: data.correctAnswer.emoji,
+          correct: data.correct,
+          guessed: option,
+        },
+      ]);
+
+      // Auto-advance
+      setTimeout(() => {
+        submitLockRef.current = false;
+        if (data.gameStatus === "finished" || currentRound + 1 >= rounds.length) {
+          finishGame(data);
+        } else {
+          setPickedOption(null);
+          setRevealData(null);
+          const next = currentRound + 1;
+          setCurrentRound(next);
+          loadAudio(rounds[next]);
+        }
+      }, REVEAL_MS);
+    } catch (err) {
+      console.error(err);
+      setError("Oops, try again.");
+      submitLockRef.current = false;
+      setPickedOption(null);
+    }
+  }
+
+  function finishGame(lastResult: RoundResult) {
+    let newStreak = 0;
+    if (mode === "daily") {
+      markDailyPlayed();
+      newStreak = bumpStreak().count;
+    }
+    const payload = {
+      gameId,
+      mode,
+      challengeId,
+      totalScore: lastResult.totalScore,
+      performanceRating: lastResult.performanceRating,
+      stickers,
+      streak: newStreak,
+    };
+    sessionStorage.setItem("gameResults", JSON.stringify(payload));
+    router.push("/results");
+  }
+
+  // ─── Lifecycle ────────────────────────────────────────
+  useEffect(() => {
+    startGame();
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentRound]);
+  }, []);
 
-  // ---- Render ----
+  const round = rounds[currentRound];
 
+  // ─── Render ───────────────────────────────────────────
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-8">
-      {/* Header */}
-      <div className="w-full max-w-2xl mb-8">
-        <div className="flex items-center justify-between">
-          <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: "var(--accent-cyan)" }}
-          >
-            Audio Visa
-          </h1>
-          {gameId && (
-            <RoundIndicator
-              currentRound={currentRound}
-              totalRounds={5}
-              roundScores={roundScores}
-            />
-          )}
-        </div>
+    <main className="min-h-screen flex flex-col items-center px-5 py-6 sm:py-8">
+      {/* Top bar */}
+      <div className="w-full max-w-2xl flex items-center justify-between mb-6">
+        <button
+          onClick={() => {
+            stopAudio();
+            router.push("/");
+          }}
+          className="kid-btn-soft"
+          style={{ padding: "0.5rem 0.9rem", fontSize: "0.85rem" }}
+        >
+          ← Home
+        </button>
+        <ProgressPips
+          total={ROUNDS_PER_GAME}
+          current={currentRound}
+          stickers={stickers}
+        />
       </div>
 
       {/* Error */}
       {error && (
         <div
-          className="glass-card p-4 mb-6 max-w-2xl w-full text-center"
-          style={{ borderColor: "var(--accent-red)" }}
+          className="kid-card w-full max-w-md mb-6 text-center"
+          style={{ borderColor: "var(--kid-red)" }}
         >
-          <p style={{ color: "var(--accent-red)" }}>{error}</p>
-          <div className="flex gap-3 justify-center mt-3">
-            <button
-              onClick={() => setError(null)}
-              className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                color: "var(--text-primary)",
-              }}
-            >
-              Dismiss
-            </button>
-            {!gameId ? (
-              <button
-                onClick={() => {
-                  setError(null);
-                  startGame();
-                }}
-                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
-                style={{ background: "var(--accent-cyan)", color: "black" }}
-              >
-                Try Again
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setError(null);
-                  // Retry the guess submission
-                  if (phase === "guessing" && locationGuess.trim()) {
-                    handleSubmitGuess();
-                  }
-                }}
-                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer"
-                style={{ background: "var(--accent-cyan)", color: "black" }}
-              >
-                Retry
-              </button>
-            )}
-          </div>
+          <p className="font-bold mb-3" style={{ color: "var(--kid-red)" }}>{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              if (!gameId) startGame();
+            }}
+            className="kid-btn"
+            style={{
+              background: "var(--kid-blue)",
+              borderBottomColor: "var(--kid-blue-d)",
+            }}
+          >
+            Try again
+          </button>
         </div>
       )}
 
       <AnimatePresence mode="wait">
-        {/* Loading */}
         {phase === "loading" && (
           <motion.div
             key="loading"
@@ -389,379 +340,264 @@ function PlayPageInner() {
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="w-3 h-3 rounded-full"
+                  className="w-4 h-4 rounded-full"
                   style={{
-                    background: "var(--accent-cyan)",
-                    animation: `pulse-glow 1s ease-in-out ${i * 0.2}s infinite`,
+                    background: "var(--kid-blue)",
+                    animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
                   }}
                 />
               ))}
             </div>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Preparing your game...
+            <p className="font-bold" style={{ color: "var(--text-secondary)" }}>
+              Getting sounds ready...
             </p>
           </motion.div>
         )}
 
-        {/* Listening */}
-        {phase === "listening" && (
+        {phase === "playing" && round && (
           <motion.div
-            key="listening"
-            initial={{ opacity: 0, y: 20 }}
+            key={`round-${currentRound}`}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="w-full max-w-2xl flex flex-col items-center gap-6"
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35 }}
+            className="w-full max-w-lg flex flex-col items-center gap-6"
           >
+            {/* Prompt */}
             <h2
-              className="text-2xl font-semibold text-center"
+              className="text-2xl sm:text-3xl font-black text-center"
               style={{ color: "var(--text-primary)" }}
             >
-              Listen carefully...
+              What&apos;s this sound?
             </h2>
 
-            {isGeneratingAudio && (
-              <div className="glass-card p-4 text-center w-full max-w-lg">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                      background: "var(--accent-amber)",
-                      animation: "pulse-glow 1s ease-in-out infinite",
-                    }}
-                  />
-                  <span style={{ color: "var(--accent-amber)" }}>
-                    Generating soundscape...
-                  </span>
-                </div>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  Creating a unique audio scene just for you
-                </p>
-              </div>
-            )}
+            {/* Speaker card */}
+            <SpeakerCard
+              onPlay={playAudio}
+              playing={isPlaying}
+              generating={isGenerating}
+              failed={audioError}
+              disabled={!!revealData}
+            />
 
-            {audioFailed && !currentAudioUrls && (
-              <div
-                className="glass-card p-4 text-center w-full max-w-lg"
-                style={{
-                  borderColor: "var(--accent-amber)",
-                }}
-              >
-                <p className="text-sm mb-2" style={{ color: "var(--accent-amber)" }}>
-                  Audio generation unavailable. You can still guess based on your instincts!
-                </p>
-                <button
-                  onClick={() => setPhase("guessing")}
-                  className="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
-                  style={{
-                    background: "var(--accent-amber)",
-                    color: "black",
-                  }}
-                >
-                  Skip to Guess
-                </button>
-              </div>
-            )}
+            {/* 4 tiles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+              {round.options.map((option) => {
+                const picked = pickedOption === option;
+                const isCorrect = revealData?.correct && picked;
+                const isWrong = revealData && picked && !revealData.correct;
+                const isCorrectReveal =
+                  revealData && option === revealData.correctAnswer.name;
 
-            {!audioFailed && (
-              <AudioPlayer
-                audioUrls={currentAudioUrls}
-                onFinished={() => {}}
-              />
-            )}
+                let tileStyle: React.CSSProperties = {};
+                if (isCorrect || isCorrectReveal) {
+                  tileStyle = {
+                    background: "var(--kid-green)",
+                    borderColor: "var(--kid-green)",
+                    borderBottomColor: "var(--kid-green-d)",
+                    color: "#ffffff",
+                  };
+                } else if (isWrong) {
+                  tileStyle = {
+                    background: "var(--kid-red)",
+                    borderColor: "var(--kid-red)",
+                    borderBottomColor: "var(--kid-red-d)",
+                    color: "#ffffff",
+                  };
+                } else if (picked) {
+                  tileStyle = {
+                    borderColor: "var(--kid-blue)",
+                    borderBottomColor: "var(--kid-blue-d)",
+                  };
+                }
 
-            <button
-              onClick={() => setPhase("guessing")}
-              className="px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "var(--text-primary)",
-              }}
-            >
-              Ready to Guess
-            </button>
-          </motion.div>
-        )}
-
-        {/* Guessing */}
-        {phase === "guessing" && (
-          <motion.div
-            key="guessing"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="w-full max-w-2xl flex flex-col items-center gap-6"
-          >
-            <div className="flex flex-col items-center gap-3">
-              <h2
-                className="text-2xl font-semibold text-center"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Where is this?
-              </h2>
-              <div
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold"
-                style={{
-                  background: timeLeft <= 10 ? "rgba(255, 80, 80, 0.15)" : "rgba(0, 240, 255, 0.12)",
-                  border: `1px solid ${timeLeft <= 10 ? "rgba(255, 80, 80, 0.4)" : "rgba(0, 240, 255, 0.3)"}`,
-                  color: timeLeft <= 10 ? "var(--accent-red)" : "var(--accent-cyan)",
-                }}
-                aria-label={`${timeLeft} seconds remaining`}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                {timeLeft}s
-              </div>
-            </div>
-
-            {/* Mini audio player — can re-listen */}
-            <div className="w-full max-w-lg">
-              <AudioPlayer audioUrls={currentAudioUrls} />
-            </div>
-
-            {/* Guess form */}
-            <div className="glass-card p-6 w-full max-w-lg space-y-5">
-              {/* Location input */}
-              <div>
-                <label
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={locationGuess}
-                  onChange={(e) => setLocationGuess(e.target.value)}
-                  placeholder="Where is this? (e.g., Tokyo, Japan)"
-                  className="w-full px-4 py-3 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan transition-all"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.08)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && locationGuess.trim()) {
-                      handleSubmitGuess();
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Decade selector */}
-              <div>
-                <label
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Decade
-                </label>
-                <select
-                  value={eraGuess}
-                  onChange={(e) => setEraGuess(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.08)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                  }}
-                >
-                  {DECADES.map((d) => (
-                    <option key={d} value={d} style={{ background: "#1a1a2e" }}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hint */}
-              {hintText && (
-                <div
-                  className="p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-                  style={{
-                    background: "rgba(255, 165, 0, 0.1)",
-                    border: "1px solid rgba(255, 165, 0, 0.3)",
-                    color: "var(--accent-amber)",
-                  }}
-                >
-                  <span>{hintText}</span>
-                  {hintSfxUrl && (
-                    <button
-                      onClick={() => {
-                        try {
-                          new Audio(hintSfxUrl).play().catch(() => {});
-                        } catch {}
-                      }}
-                      className="px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 shrink-0"
-                      style={{
-                        background: "rgba(255, 165, 0, 0.2)",
-                        color: "var(--accent-amber)",
-                      }}
-                      aria-label="Play bonus sound clue"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                      Bonus clue
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex gap-3">
-                {!hintUsed && (
-                  <button
-                    onClick={handleUseHint}
-                    className="flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    style={{
-                      background: "rgba(255, 165, 0, 0.1)",
-                      border: "1px solid rgba(255, 165, 0, 0.3)",
-                      color: "var(--accent-amber)",
-                    }}
+                return (
+                  <motion.button
+                    key={option}
+                    whileHover={revealData ? {} : { y: -2 }}
+                    whileTap={revealData ? {} : { y: 2 }}
+                    onClick={() => handlePick(option)}
+                    disabled={!!revealData || !!pickedOption}
+                    className={`kid-tile ${isWrong ? "animate-shake" : ""}`}
+                    style={tileStyle}
                   >
-                    Use Hint (-200 pts)
-                  </button>
-                )}
-                <button
-                  onClick={() => handleSubmitGuess()}
-                  disabled={!locationGuess.trim() || isSubmitting}
-                  className="flex-1 px-4 py-3 rounded-xl text-lg font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    {/* Leading emoji — only show on reveal so kids can't cheat */}
+                    {(isCorrectReveal || isCorrect || isWrong) && revealData?.correctAnswer.emoji && option === revealData?.correctAnswer.name && (
+                      <span className="text-3xl">{revealData.correctAnswer.emoji}</span>
+                    )}
+                    <span className="flex-1">{option}</span>
+                    {isCorrectReveal && (
+                      <span className="text-2xl" aria-hidden>✓</span>
+                    )}
+                    {isWrong && (
+                      <span className="text-2xl" aria-hidden>✗</span>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {/* Reveal message */}
+            {revealData && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <div className="text-6xl mb-2 animate-bounce-in" aria-hidden>
+                  {revealData.correctAnswer.emoji}
+                </div>
+                <p
+                  className="text-2xl font-black"
                   style={{
-                    background:
-                      "linear-gradient(135deg, var(--accent-cyan), #00c4ff)",
-                    color: "black",
+                    color: revealData.correct ? "var(--kid-green)" : "var(--kid-red)",
                   }}
                 >
-                  {isSubmitting ? "Scoring..." : "Submit Guess"}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Revealing */}
-        {phase === "revealing" && roundResult && (
-          <motion.div
-            key="revealing"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="w-full max-w-2xl flex flex-col items-center gap-6"
-          >
-            {/* Score */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, type: "spring" }}
-            >
-              <ScoreDisplay
-                score={roundResult.score}
-                maxScore={roundResult.maxScore}
-                animate={true}
-                size="lg"
-              />
-            </motion.div>
-
-            {/* Correct answer card */}
-            <div className="glass-card p-6 w-full max-w-lg space-y-4">
-              <div>
-                <span
-                  className="text-xs uppercase tracking-widest"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Correct Answer
-                </span>
-                <h3 className="text-xl font-bold mt-1" style={{ color: "var(--text-primary)" }}>
-                  {roundResult.correctAnswer.location}
-                </h3>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {roundResult.correctAnswer.country} &middot;{" "}
-                  {roundResult.correctAnswer.continent} &middot;{" "}
-                  {roundResult.correctAnswer.era}
+                  {revealData.correct ? "🎉 Yes!" : "So close!"}
                 </p>
-              </div>
-
-              {/* Your guess */}
-              <div>
-                <span
-                  className="text-xs uppercase tracking-widest"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Your Guess
-                </span>
-                <p className="text-sm mt-1" style={{ color: "var(--text-primary)" }}>
-                  {locationGuess} &middot; {eraGuess}
+                <p className="text-base font-bold mt-1" style={{ color: "var(--text-primary)" }}>
+                  It&apos;s a {revealData.correctAnswer.name}!
                 </p>
-              </div>
-
-              {/* Description */}
-              <p
-                className="text-sm italic leading-relaxed"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                &ldquo;{roundResult.correctAnswer.description}&rdquo;
-              </p>
-
-              {/* Sounds */}
-              <div>
-                <span
-                  className="text-xs uppercase tracking-widest"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Sounds you heard
-                </span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {roundResult.correctAnswer.sounds.map((sound, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        background: "rgba(0, 240, 255, 0.1)",
-                        border: "1px solid rgba(0, 240, 255, 0.2)",
-                        color: "var(--accent-cyan)",
-                      }}
-                    >
-                      {sound}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Running total */}
-            <div className="text-center">
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Total Score
-              </span>
-              <ScoreDisplay
-                score={roundResult.totalScore}
-                maxScore={5000}
-                animate={true}
-                size="sm"
-              />
-            </div>
-
-            {/* Next button */}
-            <button
-              onClick={handleNextRound}
-              className="px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--accent-cyan), #00c4ff)",
-                color: "black",
-                boxShadow: "0 0 30px rgba(0, 240, 255, 0.3)",
-              }}
-            >
-              {currentRound + 1 >= rounds.length ||
-              roundResult.gameStatus === "finished"
-                ? "See Results"
-                : "Next Round"}
-            </button>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+/* ───────── Components ───────── */
+
+function SpeakerCard({
+  onPlay,
+  playing,
+  generating,
+  failed,
+  disabled,
+}: {
+  onPlay: () => void;
+  playing: boolean;
+  generating: boolean;
+  failed: boolean;
+  disabled: boolean;
+}) {
+  return (
+    <motion.button
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.97 }}
+      onClick={disabled ? undefined : onPlay}
+      disabled={disabled || generating || failed}
+      className="w-full rounded-3xl p-8 flex flex-col items-center gap-4 cursor-pointer disabled:cursor-not-allowed"
+      style={{
+        background: playing ? "var(--kid-yellow)" : "var(--kid-blue)",
+        borderBottom: `6px solid ${
+          playing ? "var(--kid-yellow-d)" : "var(--kid-blue-d)"
+        }`,
+        color: "#ffffff",
+        minHeight: "180px",
+        transition: "background 0.2s ease",
+      }}
+    >
+      {generating ? (
+        <>
+          <div className="flex gap-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-full bg-white"
+                style={{
+                  animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+          <p className="text-lg font-black uppercase tracking-widest">
+            Getting sound...
+          </p>
+        </>
+      ) : failed ? (
+        <>
+          <div className="text-6xl" aria-hidden>🙈</div>
+          <p className="text-lg font-black uppercase tracking-widest text-center">
+            Sound not ready — pick anyway!
+          </p>
+        </>
+      ) : (
+        <>
+          {/* Animated equalizer bars */}
+          <div className="flex items-end gap-1 h-14">
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+              const base = 20 + Math.sin(i * 0.9) * 18 + 30;
+              return (
+                <div
+                  key={i}
+                  className="w-2.5 rounded-full bg-white"
+                  style={{
+                    height: `${base}%`,
+                    opacity: playing ? 0.95 : 0.55,
+                    animation: playing
+                      ? `pulse-glow ${0.7 + i * 0.07}s ease-in-out ${i * 0.08}s infinite`
+                      : "none",
+                  }}
+                />
+              );
+            })}
+          </div>
+          <p className="text-lg font-black uppercase tracking-widest">
+            {playing ? "🔊 Listening..." : "🎵 Tap to listen"}
+          </p>
+        </>
+      )}
+    </motion.button>
+  );
+}
+
+function ProgressPips({
+  total,
+  current,
+  stickers,
+}: {
+  total: number;
+  current: number;
+  stickers: StickerEntry[];
+}) {
+  return (
+    <div className="flex gap-2">
+      {Array.from({ length: total }, (_, i) => {
+        const played = stickers[i];
+        const isCurrent = i === current && !played;
+        let bg = "#e5e5e5";
+        let border = "#d9d9d9";
+        let label: string | null = null;
+        if (played) {
+          if (played.correct) {
+            bg = "var(--kid-green)";
+            border = "var(--kid-green-d)";
+            label = "✓";
+          } else {
+            bg = "var(--kid-red)";
+            border = "var(--kid-red-d)";
+            label = "✗";
+          }
+        } else if (isCurrent) {
+          bg = "var(--kid-blue)";
+          border = "var(--kid-blue-d)";
+        }
+        return (
+          <div
+            key={i}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-sm"
+            style={{
+              background: bg,
+              borderBottom: `3px solid ${border}`,
+              opacity: played || isCurrent ? 1 : 0.6,
+            }}
+          >
+            {label ?? ""}
+          </div>
+        );
+      })}
+    </div>
   );
 }
