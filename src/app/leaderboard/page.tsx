@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import SafariBackground from "@/components/SafariBackground";
+
+const Trophy3D = dynamic(() => import("@/components/Trophy3D"), {
+  ssr: false,
+  loading: () => null,
+});
 
 interface LeaderboardEntry {
   rank: number;
@@ -33,126 +40,158 @@ export default function LeaderboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-5 py-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="text-center mb-6"
-      >
-        <div className="text-6xl animate-bounce-in">🏆</div>
-        <h1
-          className="text-3xl sm:text-4xl font-black mt-2"
-          style={{ color: "var(--kid-yellow)" }}
+    <>
+      <SafariBackground />
+      <main className="relative z-10 min-h-screen flex flex-col items-center px-5 py-10">
+        {/* Header with 3D trophy */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-6 flex flex-col items-center"
         >
-          Today&apos;s Top Kids
-        </h1>
-        {date && (
+          <Trophy3D size={180} />
           <p
-            className="text-sm font-bold mt-1"
-            style={{ color: "var(--text-secondary)" }}
+            className="font-display text-[11px] uppercase tracking-[0.4em] mt-2"
+            style={{ color: "rgba(255, 244, 214, 0.7)" }}
           >
-            {date}
+            · Today's Expedition Log ·
           </p>
-        )}
-      </motion.div>
-
-      <div className="w-full max-w-md space-y-3 mb-8">
-        {entries === null ? (
-          Array.from({ length: 5 }, (_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl h-16 animate-pulse"
-              style={{ background: "var(--bg-soft)", border: "2px solid var(--border-soft)" }}
-            />
-          ))
-        ) : entries.length === 0 ? (
-          <div className="kid-card text-center">
-            <div className="text-5xl mb-2">🌱</div>
-            <p className="font-bold" style={{ color: "var(--text-secondary)" }}>
-              No scores yet today. You could be first!
+          <h1
+            className="font-display text-3xl sm:text-4xl font-bold mt-1"
+            style={{ color: "var(--safari-gold)" }}
+          >
+            Top Explorers
+          </h1>
+          {date && (
+            <p
+              className="text-sm font-bold mt-1"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {date}
             </p>
-          </div>
-        ) : (
-          entries.map((entry, i) => {
-            const medal = medalFor(entry.rank);
-            const accent =
-              entry.rank === 1
-                ? "var(--kid-yellow)"
-                : entry.rank === 2
-                ? "var(--kid-blue)"
-                : entry.rank === 3
-                ? "var(--kid-orange)"
-                : "#e5e5e5";
-            const accentShadow =
-              entry.rank === 1
-                ? "var(--kid-yellow-d)"
-                : entry.rank === 2
-                ? "var(--kid-blue-d)"
-                : entry.rank === 3
-                ? "var(--kid-orange-d)"
-                : "#d9d9d9";
-            return (
-              <motion.div
-                key={`${entry.rank}-${entry.nickname}`}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="rounded-2xl p-4 flex items-center gap-4 bg-white"
+          )}
+        </motion.div>
+
+        <div className="w-full max-w-md space-y-3 mb-8">
+          {entries === null ? (
+            Array.from({ length: 5 }, (_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl h-16 animate-pulse"
                 style={{
-                  border: `3px solid ${accent}`,
-                  borderBottomWidth: "5px",
-                  borderBottomColor: accentShadow,
+                  background: "rgba(255, 244, 214, 0.06)",
+                  border: "2px solid rgba(127, 176, 105, 0.2)",
                 }}
+              />
+            ))
+          ) : entries.length === 0 ? (
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{
+                background: "rgba(13, 59, 46, 0.6)",
+                border: "2px solid rgba(127, 176, 105, 0.35)",
+                borderBottomWidth: "4px",
+                borderBottomColor: "rgba(127, 176, 105, 0.2)",
+              }}
+            >
+              <div className="text-5xl mb-2">🌱</div>
+              <p
+                className="font-bold"
+                style={{ color: "var(--safari-cream)" }}
               >
-                <div
-                  className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black"
+                No explorers yet today. Be the first!
+              </p>
+            </div>
+          ) : (
+            entries.map((entry, i) => {
+              const medal = medalFor(entry.rank);
+              const accent =
+                entry.rank === 1
+                  ? "var(--safari-gold)"
+                  : entry.rank === 2
+                  ? "var(--kid-blue)"
+                  : entry.rank === 3
+                  ? "var(--safari-amber)"
+                  : "rgba(127, 176, 105, 0.4)";
+              const accentShadow =
+                entry.rank === 1
+                  ? "var(--safari-gold-d)"
+                  : entry.rank === 2
+                  ? "var(--kid-blue-d)"
+                  : entry.rank === 3
+                  ? "var(--safari-amber-d)"
+                  : "rgba(127, 176, 105, 0.2)";
+              return (
+                <motion.div
+                  key={`${entry.rank}-${entry.nickname}`}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className="rounded-2xl p-4 flex items-center gap-4"
                   style={{
-                    background: accent,
-                    color: entry.rank <= 3 ? "#ffffff" : "var(--text-primary)",
+                    background: "rgba(13, 59, 46, 0.65)",
+                    border: `3px solid ${accent}`,
+                    borderBottomWidth: "5px",
+                    borderBottomColor: accentShadow,
                   }}
                 >
-                  {medal ?? `#${entry.rank}`}
-                </div>
-                <span
-                  className="flex-1 font-black truncate"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {entry.nickname}
-                </span>
-                <span
-                  className="font-black text-lg"
-                  style={{ color: accent }}
-                >
-                  {entry.score}
-                </span>
-              </motion.div>
-            );
-          })
-        )}
-      </div>
+                  <div
+                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center font-display text-xl font-black"
+                    style={{
+                      background:
+                        entry.rank <= 3
+                          ? accent
+                          : "rgba(255, 244, 214, 0.1)",
+                      color:
+                        entry.rank <= 3
+                          ? "var(--jungle-deep)"
+                          : "var(--safari-cream)",
+                    }}
+                  >
+                    {medal ?? `#${entry.rank}`}
+                  </div>
+                  <span
+                    className="flex-1 font-display font-black truncate"
+                    style={{ color: "var(--safari-cream)" }}
+                  >
+                    {entry.nickname}
+                  </span>
+                  <span
+                    className="font-display font-black text-lg"
+                    style={{ color: accent }}
+                  >
+                    {entry.score}
+                  </span>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
 
-      <div className="flex gap-3 w-full max-w-sm">
-        <button
-          onClick={() => router.push("/")}
-          className="kid-btn-soft flex-1"
-          style={{ padding: "0.9rem 1rem" }}
-        >
-          🏠 Home
-        </button>
-        <button
-          onClick={() => router.push("/play?mode=daily")}
-          className="kid-btn flex-1"
-          style={{
-            background: "var(--kid-green)",
-            borderBottomColor: "var(--kid-green-d)",
-            padding: "0.9rem 1rem",
-          }}
-        >
-          Play today
-        </button>
-      </div>
-    </main>
+        <div className="flex gap-3 w-full max-w-sm">
+          <button
+            onClick={() => router.push("/")}
+            className="kid-btn-soft flex-1 font-display"
+            style={{ padding: "0.9rem 1rem" }}
+          >
+            🏠 Basecamp
+          </button>
+          <button
+            onClick={() => router.push("/play?mode=daily")}
+            className="kid-btn flex-1 font-display"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--safari-gold), var(--safari-amber))",
+              borderBottomColor: "var(--safari-amber-d)",
+              color: "var(--jungle-deep)",
+              padding: "0.9rem 1rem",
+            }}
+          >
+            Start expedition
+          </button>
+        </div>
+      </main>
+    </>
   );
 }

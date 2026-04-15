@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  gameStore,
+  getGame,
+  saveGame,
   getPerformanceRating,
   POINTS_PER_CORRECT,
 } from "../../../../../lib/game-engine";
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const game = gameStore.get(gameId);
+    const game = await getGame(gameId);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
@@ -71,6 +72,8 @@ export async function POST(request: NextRequest) {
       game.status = "finished";
       game.performanceRating = getPerformanceRating(game.totalScore);
     }
+
+    await saveGame(game);
 
     return NextResponse.json({
       score,

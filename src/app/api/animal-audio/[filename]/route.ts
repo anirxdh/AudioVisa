@@ -22,7 +22,8 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const root = process.env.VERCEL
+  const isServerless = !!process.env.VERCEL || !!process.env.NETLIFY;
+  const root = isServerless
     ? path.join("/tmp", "animals")
     : path.join(process.cwd(), "public", "animals");
   const filePath = path.join(root, filename);

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import animalsData from "../../data/animals.json";
 import type { Animal, AnimalCategory } from "../../types/animal";
 import {
@@ -14,7 +15,18 @@ import {
   hasPlayedDailyToday,
   todayISODate,
 } from "../../lib/kid-storage";
-import HeroVideoBackground from "@/components/HeroVideoBackground";
+import HeroVideoOnce from "@/components/HeroVideoOnce";
+import SafariBackground from "@/components/SafariBackground";
+
+// SSR-safe dynamic import for the 3D mascot (three.js is a client-only lib)
+const FloatingMascot3D = dynamic(
+  () => import("@/components/FloatingMascot3D"),
+  { ssr: false, loading: () => null }
+);
+const ParallaxSilhouettes3D = dynamic(
+  () => import("@/components/ParallaxSilhouettes3D"),
+  { ssr: false, loading: () => null }
+);
 
 const ANIMALS = (animalsData as { animals: Animal[] }).animals;
 
@@ -34,12 +46,12 @@ const BIOMES: {
   emoji: string;
   color: string;
 }[] = [
-  { id: "farm", label: "Farm", emoji: "🚜", color: "#ffc800" },
-  { id: "pets", label: "Pets", emoji: "🐕", color: "#ce82ff" },
-  { id: "wild", label: "Wild", emoji: "🌳", color: "#58cc02" },
-  { id: "birds", label: "Birds", emoji: "🦜", color: "#1cb0f6" },
-  { id: "ocean", label: "Ocean", emoji: "🌊", color: "#0e82b3" },
-  { id: "reptiles", label: "Reptiles", emoji: "🐢", color: "#458a00" },
+  { id: "farm", label: "Farm", emoji: "🚜", color: "#f4a72b" },
+  { id: "pets", label: "Pets", emoji: "🐕", color: "#b07cd6" },
+  { id: "wild", label: "Wild", emoji: "🌳", color: "#88c34a" },
+  { id: "birds", label: "Birds", emoji: "🦜", color: "#3fb3c4" },
+  { id: "ocean", label: "Ocean", emoji: "🌊", color: "#2a8fa0" },
+  { id: "reptiles", label: "Reptiles", emoji: "🐢", color: "#5f8c3f" },
   { id: "insects", label: "Insects", emoji: "🐛", color: "#ff9600" },
 ];
 
@@ -53,9 +65,7 @@ function useCountdownToNextDay(): string {
           now.getUTCFullYear(),
           now.getUTCMonth(),
           now.getUTCDate() + 1,
-          0,
-          0,
-          0
+          0, 0, 0
         )
       );
       const ms = tomorrow.getTime() - now.getTime();
@@ -156,134 +166,115 @@ export default function Home() {
 
   return (
     <>
-      <HeroVideoBackground />
+      {/* Safari background appears after the hero scrolls past — fixed */}
+      <SafariBackground />
 
-      <main className="relative z-10 min-h-screen flex flex-col">
-        {/* ═════ HERO — fullscreen cinematic ═════ */}
-        <section className="min-h-[65vh] sm:min-h-[72vh] flex flex-col items-center justify-center px-5 py-14 text-white">
+      <main className="relative z-10">
+        {/* ═════ HERO — one-time video, full viewport ═════ */}
+        <HeroVideoOnce />
+
+        {/* ═════ APP SECTION — everything else lives here ═════ */}
+        <section
+          id="app"
+          className="relative px-4 sm:px-8 pt-12 sm:pt-16 pb-16"
+          style={{ scrollMarginTop: "0" }}
+        >
+          {/* 3D parallax silhouettes drifting behind the content */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
+            <ParallaxSilhouettes3D />
+          </div>
+          {/* Safari poster header strip */}
           <motion.div
-            initial={{ opacity: 0, y: -18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-center max-w-5xl"
+            initial={{ opacity: 0, y: -10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="relative max-w-6xl mx-auto text-center mb-8"
           >
             <p
-              className="text-[11px] sm:text-xs font-black uppercase tracking-[0.4em] mb-5 opacity-90"
-              style={{ textShadow: "0 2px 10px rgba(0,0,0,0.45)" }}
+              className="font-display text-[11px] sm:text-xs uppercase tracking-[0.4em] mb-2"
+              style={{ color: "rgba(255, 244, 214, 0.7)" }}
             >
-              · An animal-sound learning adventure ·
+              · The Expedition Begins ·
             </p>
-            <h1
-              className="font-black tracking-tight leading-[0.9]"
+            <h2
+              className="font-display font-bold tracking-tight leading-none"
               style={{
-                fontSize: "clamp(3.25rem, 11vw, 8rem)",
-                background:
-                  "linear-gradient(180deg, #ffffff 0%, #f7e8c5 72%, #ffc86c 100%)",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                textShadow: "0 6px 40px rgba(0,0,0,0.45)",
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                color: "var(--safari-gold)",
+                textShadow: "0 4px 20px rgba(0,0,0,0.55)",
               }}
             >
-              Audio Visa
-            </h1>
-            <p
-              className="mt-5 text-lg sm:text-2xl font-bold max-w-2xl mx-auto"
-              style={{
-                color: "rgba(255,255,255,0.95)",
-                textShadow: "0 2px 16px rgba(0,0,0,0.55)",
-              }}
-            >
-              Hear the sound. Tap the animal. Little ears, big discoveries.
-            </p>
-
-            {/* Feature chips */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-              {[
-                { emoji: "🐾", label: "55+ Animals" },
-                { emoji: "🗺️", label: "7 Biomes" },
-                { emoji: "🏆", label: "Daily Challenge" },
-                { emoji: "⚡", label: "No Ads. No Distractions." },
-              ].map((chip) => (
-                <span
-                  key={chip.label}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest"
-                  style={{
-                    background: "rgba(255,255,255,0.12)",
-                    border: "1px solid rgba(255,255,255,0.22)",
-                    backdropFilter: "blur(8px)",
-                    color: "rgba(255,255,255,0.95)",
-                  }}
-                >
-                  <span>{chip.emoji}</span>
-                  <span>{chip.label}</span>
-                </span>
-              ))}
-            </div>
-
-            {/* Scroll cue */}
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="mt-10 text-white/70 text-sm font-bold"
-            >
-              ↓ Start below
-            </motion.div>
+              Welcome, little explorer
+            </h2>
           </motion.div>
-        </section>
 
-        {/* ═════ CONTENT PANEL — white/glass deck below hero ═════ */}
-        <section className="relative px-4 sm:px-8 pb-16">
+          {/* 3D Floating Mascot */}
+          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 pointer-events-none">
+            <FloatingMascot3D size={180} />
+          </div>
+
+          {/* Main panel */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="max-w-6xl mx-auto rounded-[32px] overflow-hidden"
+            transition={{ duration: 0.6 }}
+            className="max-w-6xl mx-auto rounded-[32px] overflow-hidden paper-texture"
             style={{
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,250,242,0.98) 100%)",
-              border: "1px solid rgba(255,255,255,0.8)",
+                "linear-gradient(180deg, rgba(13, 59, 46, 0.72) 0%, rgba(6, 42, 30, 0.85) 100%)",
+              border: "1px solid rgba(127, 176, 105, 0.35)",
+              backdropFilter: "blur(22px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(22px) saturate(1.2)",
               boxShadow:
-                "0 40px 120px -40px rgba(15, 23, 42, 0.55), 0 4px 12px rgba(15, 23, 42, 0.12)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
+                "0 40px 120px -40px rgba(0, 0, 0, 0.75), 0 4px 12px rgba(0, 0, 0, 0.25)",
             }}
           >
             <div className="p-6 sm:p-10 space-y-10">
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                <Stat emoji="🔥" value={`${streak}`} label={streak === 1 ? "Day streak" : "Days streak"} color="var(--kid-orange)" />
                 <Stat
-                  emoji="⭐"
+                  emoji="🔥"
+                  value={`${streak}`}
+                  label={streak === 1 ? "Day streak" : "Days streak"}
+                  color="var(--safari-amber)"
+                />
+                <Stat
+                  emoji="🏅"
                   value={`${stickers.size}/${totalStickers}`}
                   label={`${stickerPct}% collected`}
-                  color="var(--kid-yellow)"
+                  color="var(--safari-gold)"
                 />
                 <StatButton
                   emoji="🏆"
                   value="Top Kids"
-                  label="See leaderboard"
+                  label="Expedition log"
                   onClick={() => router.push("/leaderboard")}
                 />
               </div>
 
               {/* Nickname + Modes */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
-                {/* Left: nickname */}
                 <div className="lg:col-span-2">
-                  <div className="premium-card-solid p-5">
+                  <div
+                    className="p-5 rounded-3xl"
+                    style={{
+                      background: "rgba(255, 244, 214, 0.06)",
+                      border: "1px solid rgba(127, 176, 105, 0.35)",
+                    }}
+                  >
                     <h3
-                      className="text-xs font-black uppercase tracking-[0.3em] mb-2"
-                      style={{ color: "var(--text-secondary)" }}
+                      className="font-display text-xs uppercase tracking-[0.3em] mb-2"
+                      style={{ color: "var(--safari-gold)" }}
                     >
-                      Little Player
+                      Explorer Name
                     </h3>
                     <p
                       className="text-sm font-bold mb-3"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      Type your name so your scores show up on the leaderboard 🏆
+                      Type your name so your safari shows up on the leaderboard 🏆
                     </p>
                     <div className="relative">
                       <input
@@ -295,15 +286,15 @@ export default function Home() {
                         maxLength={20}
                         className="w-full rounded-2xl px-4 py-3 text-lg font-black outline-none transition-colors"
                         style={{
-                          background: "#ffffff",
+                          background: "rgba(255, 244, 214, 0.95)",
                           border: `2px solid ${
                             nick.length === 0
-                              ? "var(--border-soft)"
+                              ? "rgba(127, 176, 105, 0.5)"
                               : nickValid
-                              ? "var(--kid-green)"
-                              : "var(--kid-orange)"
+                              ? "var(--leaf-bright)"
+                              : "var(--safari-amber)"
                           }`,
-                          color: "var(--text-primary)",
+                          color: "var(--jungle-deep)",
                         }}
                       />
                       {nickSaved && (
@@ -317,28 +308,30 @@ export default function Home() {
                       )}
                     </div>
                     {nick.length > 0 && !nickValid && (
-                      <p className="text-xs font-bold mt-2" style={{ color: "var(--kid-orange)" }}>
+                      <p
+                        className="text-xs font-bold mt-2"
+                        style={{ color: "var(--safari-amber)" }}
+                      >
                         Letters, numbers, space, _ or - (max 20)
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Right: mode cards — side-by-side */}
                 <div className="lg:col-span-3">
                   <h3
-                    className="text-xs font-black uppercase tracking-[0.3em] mb-3"
-                    style={{ color: "var(--text-secondary)" }}
+                    className="font-display text-xs uppercase tracking-[0.3em] mb-3"
+                    style={{ color: "var(--safari-gold)" }}
                   >
-                    Choose your quest
+                    Choose your expedition
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {dailyDone ? (
                       <DoneCard countdown={countdown} />
                     ) : (
                       <PlayCard
-                        title="Today's Animals"
-                        subtitle="3 special animals — today only"
+                        title="Today's Expedition"
+                        subtitle="3 safari animals — today only"
                         emoji="🎯"
                         accent="green"
                         loading={!dailyReady || navigating === "daily"}
@@ -354,10 +347,10 @@ export default function Home() {
                       />
                     )}
                     <PlayCard
-                      title="Play More"
+                      title="Free Roam"
                       subtitle="Random animals, any time"
                       emoji="🎧"
-                      accent="blue"
+                      accent="gold"
                       loading={navigating === "practice"}
                       loadingLabel="Starting..."
                       onClick={() => startMode("practice")}
@@ -368,7 +361,6 @@ export default function Home() {
 
               {/* Learning row: AotD + Biomes side-by-side */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-                {/* Animal of the Day */}
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -377,19 +369,19 @@ export default function Home() {
                   className="lg:col-span-2"
                 >
                   <h3
-                    className="text-xs font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-2"
-                    style={{ color: "var(--text-secondary)" }}
+                    className="font-display text-xs uppercase tracking-[0.3em] mb-3 flex items-center gap-2"
+                    style={{ color: "var(--safari-gold)" }}
                   >
-                    <span>💫</span> Animal of the Day
+                    <span>💫</span> Today&apos;s Discovery
                   </h3>
                   <div
                     className="rounded-3xl p-5 h-full"
                     style={{
                       background:
-                        "linear-gradient(135deg, #fff6d6 0%, #ffe6a1 100%)",
-                      border: "2px solid var(--kid-yellow)",
+                        "linear-gradient(135deg, #2d7d5a 0%, #1c5d44 100%)",
+                      border: "2px solid var(--safari-gold)",
                       borderBottomWidth: "5px",
-                      borderBottomColor: "var(--kid-yellow-d)",
+                      borderBottomColor: "var(--safari-gold-d)",
                     }}
                   >
                     <div className="flex items-center gap-4">
@@ -401,8 +393,8 @@ export default function Home() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4
-                          className="text-xl font-black leading-tight"
-                          style={{ color: "var(--text-primary)" }}
+                          className="font-display text-xl font-bold leading-tight"
+                          style={{ color: "var(--safari-cream)" }}
                         >
                           {aotd.name}
                         </h4>
@@ -413,14 +405,13 @@ export default function Home() {
                     </div>
                     <p
                       className="text-sm font-bold mt-3 leading-snug"
-                      style={{ color: "var(--text-primary)" }}
+                      style={{ color: "var(--safari-cream)" }}
                     >
                       💡 {aotd.funFact}
                     </p>
                   </div>
                 </motion.div>
 
-                {/* Biomes */}
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -429,10 +420,10 @@ export default function Home() {
                   className="lg:col-span-3"
                 >
                   <h3
-                    className="text-xs font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-2"
-                    style={{ color: "var(--text-secondary)" }}
+                    className="font-display text-xs uppercase tracking-[0.3em] mb-3 flex items-center gap-2"
+                    style={{ color: "var(--safari-gold)" }}
                   >
-                    <span>🗺️</span> Explore by Biome
+                    <span>🗺️</span> Safari Regions
                   </h3>
                   <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                     {BIOMES.map((b) => {
@@ -445,18 +436,22 @@ export default function Home() {
                           key={b.id}
                           className="rounded-2xl p-2.5 flex flex-col items-center gap-1 text-center transition-transform hover:-translate-y-0.5"
                           style={{
-                            background: isComplete ? `${b.color}22` : "#ffffff",
+                            background: isComplete
+                              ? `${b.color}33`
+                              : "rgba(255, 244, 214, 0.06)",
                             border: `2px solid ${
-                              isComplete ? b.color : "var(--border-soft)"
+                              isComplete ? b.color : "rgba(127, 176, 105, 0.3)"
                             }`,
                             borderBottomWidth: "4px",
-                            borderBottomColor: isComplete ? b.color : "#d9d9d9",
+                            borderBottomColor: isComplete
+                              ? b.color
+                              : "rgba(127, 176, 105, 0.15)",
                           }}
                         >
                           <span className="text-2xl">{b.emoji}</span>
                           <span
-                            className="text-[10px] font-black leading-none"
-                            style={{ color: "var(--text-primary)" }}
+                            className="font-display text-[10px] font-black leading-none"
+                            style={{ color: "var(--safari-cream)" }}
                           >
                             {b.label}
                           </span>
@@ -472,18 +467,17 @@ export default function Home() {
                       );
                     })}
                   </div>
-                  {/* Progress bar */}
                   <div className="mt-4">
                     <div
                       className="h-2.5 rounded-full overflow-hidden"
-                      style={{ background: "#ececec" }}
+                      style={{ background: "rgba(255, 244, 214, 0.1)" }}
                     >
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${stickerPct}%`,
                           background:
-                            "linear-gradient(90deg, var(--kid-yellow) 0%, var(--kid-orange) 100%)",
+                            "linear-gradient(90deg, var(--safari-gold) 0%, var(--safari-amber) 100%)",
                         }}
                       />
                     </div>
@@ -491,7 +485,8 @@ export default function Home() {
                       className="text-xs font-bold mt-2"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      {stickers.size} of {totalStickers} animals learned · keep going!
+                      {stickers.size} of {totalStickers} animals tracked —
+                      keep exploring!
                     </p>
                   </div>
                 </motion.div>
@@ -500,29 +495,32 @@ export default function Home() {
               {/* How it works strip */}
               <div
                 className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8"
-                style={{ borderTop: "1px dashed var(--border-soft)" }}
+                style={{ borderTop: "1px dashed rgba(127, 176, 105, 0.35)" }}
               >
                 {[
                   { n: "1", title: "Listen", desc: "We play a real animal sound.", emoji: "🎧" },
                   { n: "2", title: "Tap", desc: "Pick the animal you heard.", emoji: "👆" },
-                  { n: "3", title: "Collect", desc: "Earn a sticker and a fun fact.", emoji: "⭐" },
+                  { n: "3", title: "Collect", desc: "Earn a safari badge + fun fact.", emoji: "🏅" },
                 ].map((step) => (
                   <div
                     key={step.n}
                     className="flex items-start gap-3"
-                    style={{ color: "var(--text-primary)" }}
+                    style={{ color: "var(--safari-cream)" }}
                   >
                     <div
                       className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                       style={{
-                        background: "var(--bg-soft)",
-                        border: "2px solid var(--border-soft)",
+                        background: "rgba(255, 244, 214, 0.08)",
+                        border: "2px solid rgba(127, 176, 105, 0.3)",
                       }}
                     >
                       {step.emoji}
                     </div>
                     <div>
-                      <h4 className="text-sm font-black uppercase tracking-widest" style={{ color: "var(--kid-blue)" }}>
+                      <h4
+                        className="font-display text-sm font-black uppercase tracking-widest"
+                        style={{ color: "var(--safari-gold)" }}
+                      >
                         Step {step.n}
                       </h4>
                       <p className="text-base font-black">{step.title}</p>
@@ -539,7 +537,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Footer credit */}
+          {/* Footer */}
           <motion.footer
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -548,10 +546,10 @@ export default function Home() {
             className="mt-8 text-center"
           >
             <p
-              className="text-[11px] font-bold uppercase tracking-widest"
-              style={{ color: "rgba(255,255,255,0.75)" }}
+              className="font-display text-[11px] uppercase tracking-widest"
+              style={{ color: "rgba(255, 244, 214, 0.55)" }}
             >
-              Made with ElevenLabs · turbopuffer · Upstash · for little ears 🎈
+              Made with ElevenLabs · turbopuffer · Upstash · for little explorers 🌿
             </p>
           </motion.footer>
         </section>
@@ -577,27 +575,27 @@ function Stat({
     <div
       className="rounded-2xl p-4 flex items-center gap-3"
       style={{
-        background: "#ffffff",
-        border: "2px solid var(--border-soft)",
+        background: "rgba(255, 244, 214, 0.06)",
+        border: "2px solid rgba(127, 176, 105, 0.3)",
         borderBottomWidth: "4px",
-        borderBottomColor: "#d9d9d9",
+        borderBottomColor: "rgba(127, 176, 105, 0.15)",
       }}
     >
       <div
         className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-        style={{ background: "var(--bg-soft)" }}
+        style={{ background: "rgba(255, 244, 214, 0.1)" }}
       >
         {emoji}
       </div>
       <div className="min-w-0">
         <div
-          className="text-xl sm:text-2xl font-black leading-none"
+          className="font-display text-xl sm:text-2xl font-black leading-none"
           style={{ color }}
         >
           {value}
         </div>
         <div
-          className="text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1"
+          className="font-display text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1"
           style={{ color: "var(--text-muted)" }}
         >
           {label}
@@ -623,28 +621,28 @@ function StatButton({
       onClick={onClick}
       className="rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition-transform active:scale-[0.98]"
       style={{
-        background: "#ffffff",
-        border: "2px solid var(--kid-yellow)",
+        background: "rgba(244, 167, 43, 0.1)",
+        border: "2px solid var(--safari-gold)",
         borderBottomWidth: "4px",
-        borderBottomColor: "var(--kid-yellow-d)",
+        borderBottomColor: "var(--safari-gold-d)",
       }}
     >
       <div
         className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-        style={{ background: "#fff6d6" }}
+        style={{ background: "rgba(244, 167, 43, 0.18)" }}
       >
         {emoji}
       </div>
       <div className="min-w-0 text-left">
         <div
-          className="text-xl sm:text-2xl font-black leading-none"
-          style={{ color: "var(--kid-yellow)" }}
+          className="font-display text-xl sm:text-2xl font-black leading-none"
+          style={{ color: "var(--safari-gold)" }}
         >
           {value}
         </div>
         <div
-          className="text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1"
-          style={{ color: "var(--text-muted)" }}
+          className="font-display text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1"
+          style={{ color: "var(--safari-gold)" }}
         >
           {label} →
         </div>
@@ -666,7 +664,7 @@ function PlayCard({
   title: string;
   subtitle: string;
   emoji: string;
-  accent: "green" | "blue";
+  accent: "green" | "gold";
   loading: boolean;
   loadingLabel: string;
   onClick: () => void;
@@ -675,12 +673,12 @@ function PlayCard({
   const palette =
     accent === "green"
       ? {
-          grad: "linear-gradient(135deg, #6bd827 0%, #58cc02 60%, #4ba800 100%)",
-          soft: "rgba(255,255,255,0.22)",
+          grad: "linear-gradient(135deg, #88c34a 0%, #5f8c3f 55%, #4a6d2f 100%)",
+          soft: "rgba(255, 244, 214, 0.22)",
         }
       : {
-          grad: "linear-gradient(135deg, #3fc0ff 0%, #1cb0f6 60%, #0e82b3 100%)",
-          soft: "rgba(255,255,255,0.22)",
+          grad: "linear-gradient(135deg, #ffb951 0%, #f4a72b 55%, #cf8b14 100%)",
+          soft: "rgba(255, 244, 214, 0.22)",
         };
 
   return (
@@ -693,9 +691,9 @@ function PlayCard({
       className="w-full rounded-[22px] p-5 flex flex-col gap-3 text-left cursor-pointer disabled:cursor-not-allowed min-h-[148px]"
       style={{
         background: palette.grad,
-        color: "#ffffff",
+        color: "var(--safari-cream)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.24), 0 22px 40px -16px rgba(15,23,42,0.55)",
+          "inset 0 1px 0 rgba(255, 244, 214, 0.45), inset 0 -6px 0 rgba(0, 0, 0, 0.28), 0 22px 40px -16px rgba(0, 0, 0, 0.55)",
         opacity: loading ? 0.92 : 1,
       }}
       title={hint}
@@ -705,18 +703,18 @@ function PlayCard({
           className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-3xl"
           style={{
             background: palette.soft,
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+            boxShadow: "inset 0 1px 0 rgba(255, 244, 214, 0.3)",
           }}
         >
           <span>{emoji}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-black leading-tight">{title}</h3>
+          <h3 className="font-display text-xl font-black leading-tight">{title}</h3>
           <p className="text-sm font-bold opacity-95">{subtitle}</p>
         </div>
       </div>
       <div className="mt-auto flex items-center justify-between font-black">
-        <span className="text-[10px] uppercase tracking-widest opacity-90">
+        <span className="font-display text-[10px] uppercase tracking-widest opacity-90">
           {loading ? loadingLabel : "Tap to start"}
         </span>
         <span className="text-2xl">
@@ -740,34 +738,34 @@ function DoneCard({ countdown }: { countdown: string }) {
       className="w-full rounded-[22px] p-5 flex flex-col gap-3 min-h-[148px]"
       style={{
         background:
-          "linear-gradient(135deg, #f7f7f7 0%, #ececec 100%)",
-        color: "var(--text-primary)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -5px 0 rgba(0,0,0,0.06), 0 10px 24px -10px rgba(15,23,42,0.2)",
-        border: "1px solid var(--border-soft)",
+          "linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(13, 59, 46, 0.4) 100%)",
+        color: "var(--safari-cream)",
+        border: "2px solid rgba(127, 176, 105, 0.4)",
+        borderBottomWidth: "5px",
+        borderBottomColor: "rgba(127, 176, 105, 0.25)",
       }}
     >
       <div className="flex items-center gap-3">
         <div
           className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-3xl"
-          style={{ background: "#ffffff", border: "1px solid var(--border-soft)" }}
+          style={{ background: "rgba(255, 244, 214, 0.12)", border: "1px solid rgba(127, 176, 105, 0.3)" }}
         >
           🏅
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-black leading-tight">All done today!</h3>
+          <h3 className="font-display text-xl font-black leading-tight">Expedition complete!</h3>
           <p
             className="text-sm font-bold"
             style={{ color: "var(--text-secondary)" }}
           >
-            Great work. Back in{" "}
-            <span style={{ color: "var(--kid-blue)" }}>{countdown || "a bit"}</span>.
+            Next safari in{" "}
+            <span style={{ color: "var(--safari-gold)" }}>{countdown || "a bit"}</span>.
           </p>
         </div>
       </div>
-      <div className="mt-auto flex items-center justify-between text-[10px] uppercase tracking-widest font-black">
-        <span style={{ color: "var(--text-muted)" }}>Daily complete ✓</span>
-        <span style={{ color: "var(--kid-green)" }}>See you soon ✨</span>
+      <div className="mt-auto flex items-center justify-between font-display text-[10px] uppercase tracking-widest font-black">
+        <span style={{ color: "var(--text-muted)" }}>Today ✓</span>
+        <span style={{ color: "var(--leaf-bright)" }}>See you soon 🌿</span>
       </div>
     </div>
   );

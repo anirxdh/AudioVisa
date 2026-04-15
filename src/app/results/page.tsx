@@ -3,7 +3,14 @@
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { getNickname } from "../../../lib/kid-storage";
+import SafariBackground from "@/components/SafariBackground";
+
+const SpinningBadge3D = dynamic(
+  () => import("@/components/SpinningBadge3D"),
+  { ssr: false, loading: () => null }
+);
 
 interface Sticker {
   animalName: string;
@@ -85,20 +92,23 @@ function ResultsInner() {
 
   if (!results) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-4 h-4 rounded-full"
-              style={{
-                background: "var(--kid-blue)",
-                animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
-              }}
-            />
-          ))}
-        </div>
-      </main>
+      <>
+        <SafariBackground />
+        <main className="relative z-10 min-h-screen flex items-center justify-center">
+          <div className="flex gap-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-4 h-4 rounded-full"
+                style={{
+                  background: "var(--safari-gold)",
+                  animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+        </main>
+      </>
     );
   }
 
@@ -106,254 +116,305 @@ function ResultsInner() {
   const total = results.stickers.length;
   const allRight = correctCount === total;
   const headline = allRight
-    ? "Amazing! 🎉"
+    ? "Master Tracker!"
     : correctCount > 0
-    ? "Great job!"
-    : "Nice try!";
+    ? "Good Expedition!"
+    : "Safari Training!";
   const headlineColor = allRight
-    ? "var(--kid-green)"
+    ? "var(--leaf-bright)"
     : correctCount > 0
-    ? "var(--kid-blue)"
-    : "var(--kid-orange)";
+    ? "var(--safari-gold)"
+    : "var(--safari-amber)";
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-5 py-8">
+    <>
+      <SafariBackground />
       {allRight && <Confetti />}
 
-      {/* Headline */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, type: "spring" }}
-        className="text-center mb-2"
-      >
-        <div className="text-7xl sm:text-8xl animate-bounce-in">
-          {allRight ? "🏆" : correctCount > 0 ? "⭐" : "🌱"}
-        </div>
-        <h1
-          className="text-4xl sm:text-5xl font-black mt-3"
-          style={{ color: headlineColor }}
-        >
-          {headline}
-        </h1>
-        <p className="text-base sm:text-lg font-bold mt-2" style={{ color: "var(--text-secondary)" }}>
-          You got {correctCount} of {total} right!
-        </p>
-      </motion.div>
-
-      {/* Streak + rank strip (daily only) */}
-      {results.mode === "daily" && (
+      <main className="relative z-10 min-h-screen flex flex-col items-center px-5 py-10">
+        {/* Headline */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.25 }}
-          className="mt-5 w-full max-w-md grid grid-cols-2 gap-3"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, type: "spring" }}
+          className="text-center mb-2"
         >
-          <div
-            className="rounded-2xl p-4 bg-white flex items-center gap-3"
-            style={{
-              border: "3px solid var(--kid-orange)",
-              borderBottomWidth: "5px",
-              borderBottomColor: "var(--kid-orange-d)",
-            }}
-          >
-            <span className="text-3xl">🔥</span>
-            <div>
-              <div className="text-lg font-black leading-none" style={{ color: "var(--kid-orange)" }}>
-                {results.streak}-day
-              </div>
-              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                streak
-              </div>
-            </div>
+          <div className="text-7xl sm:text-8xl animate-bounce-in">
+            {allRight ? "🏆" : correctCount > 0 ? "🌿" : "🌱"}
           </div>
-          <div
-            className="rounded-2xl p-4 bg-white flex items-center gap-3"
-            style={{
-              border: "3px solid var(--kid-yellow)",
-              borderBottomWidth: "5px",
-              borderBottomColor: "var(--kid-yellow-d)",
-            }}
-          >
-            <span className="text-3xl">🏆</span>
-            <div className="flex-1 min-w-0">
-              {submitting ? (
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                      background: "var(--kid-yellow)",
-                      animation: "pulse-glow 1s ease-in-out infinite",
-                    }}
-                  />
-                  <span className="text-xs font-bold uppercase" style={{ color: "var(--text-muted)" }}>
-                    Submitting...
-                  </span>
-                </div>
-              ) : rank?.rank != null ? (
-                <>
-                  <div className="text-lg font-black leading-none" style={{ color: "var(--kid-yellow)" }}>
-                    #{rank.rank}
-                  </div>
-                  <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                    of {rank.total} today
-                  </div>
-                </>
-              ) : (
-                <div className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>
-                  Type your name on home to rank
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Sticker book */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="mt-6 mb-6"
-      >
-        <p
-          className="text-xs font-black uppercase tracking-widest mb-3 text-center"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Your Sticker Book
-        </p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          {results.stickers.map((sticker, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, rotate: -8, scale: 0.8 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              transition={{ duration: 0.45, delay: 0.45 + i * 0.15, type: "spring" }}
-              className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl flex flex-col items-center justify-center gap-1 p-2"
-              style={{
-                background: sticker.correct ? "#fffaf0" : "#f5f5f5",
-                border: `3px solid ${
-                  sticker.correct ? "var(--kid-yellow)" : "#d9d9d9"
-                }`,
-                borderBottomWidth: "6px",
-                borderBottomColor: sticker.correct
-                  ? "var(--kid-yellow-d)"
-                  : "#c5c5c5",
-                filter: sticker.correct ? "none" : "grayscale(0.7)",
-              }}
-            >
-              <span className="text-4xl sm:text-5xl">
-                {sticker.emoji ?? "🐾"}
-              </span>
-              <span
-                className="text-xs font-black text-center leading-tight"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {sticker.animalName}
-              </span>
-              {sticker.correct ? (
-                <span className="text-xs font-black" style={{ color: "var(--kid-green)" }}>
-                  ✓
-                </span>
-              ) : (
-                <span className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>
-                  missed
-                </span>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Top 3 preview (daily only) */}
-      {results.mode === "daily" && top3.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.55 }}
-          className="w-full max-w-md mb-6 rounded-2xl p-4 bg-white"
-          style={{
-            border: "2px solid var(--border-soft)",
-            borderBottomWidth: "4px",
-            borderBottomColor: "#d9d9d9",
-          }}
-        >
           <p
-            className="text-xs font-black uppercase tracking-widest mb-2 text-center"
+            className="font-display text-[11px] uppercase tracking-[0.4em] mt-3"
+            style={{ color: "rgba(255, 244, 214, 0.7)" }}
+          >
+            · Expedition Report ·
+          </p>
+          <h1
+            className="font-display text-4xl sm:text-5xl font-bold mt-1"
+            style={{ color: headlineColor }}
+          >
+            {headline}
+          </h1>
+          <p
+            className="text-base sm:text-lg font-bold mt-2"
             style={{ color: "var(--text-secondary)" }}
           >
-            Top 3 Today
+            You tracked {correctCount} of {total} animals correctly!
           </p>
-          <div className="space-y-1.5">
-            {top3.map((entry) => {
-              const medal =
-                entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉";
-              return (
+        </motion.div>
+
+        {/* Streak + Rank (daily only) */}
+        {results.mode === "daily" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+            className="mt-5 w-full max-w-md grid grid-cols-2 gap-3"
+          >
+            <div
+              className="rounded-2xl p-4 flex items-center gap-3"
+              style={{
+                background: "rgba(255, 150, 0, 0.15)",
+                border: "2px solid var(--safari-amber)",
+                borderBottomWidth: "5px",
+                borderBottomColor: "var(--safari-amber-d)",
+              }}
+            >
+              <span className="text-3xl">🔥</span>
+              <div>
                 <div
-                  key={`${entry.rank}-${entry.nickname}`}
-                  className="flex items-center justify-between text-sm font-bold"
+                  className="font-display text-lg font-black leading-none"
+                  style={{ color: "var(--safari-amber)" }}
                 >
-                  <span style={{ color: "var(--text-primary)" }}>
-                    {medal} {entry.nickname}
-                  </span>
-                  <span style={{ color: "var(--kid-blue)" }}>{entry.score}</span>
+                  {results.streak}-day
                 </div>
-              );
-            })}
+                <div
+                  className="font-display text-xs font-bold uppercase tracking-widest"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  streak
+                </div>
+              </div>
+            </div>
+            <div
+              className="rounded-2xl p-4 flex items-center gap-3"
+              style={{
+                background: "rgba(244, 167, 43, 0.15)",
+                border: "2px solid var(--safari-gold)",
+                borderBottomWidth: "5px",
+                borderBottomColor: "var(--safari-gold-d)",
+              }}
+            >
+              <span className="text-3xl">🏆</span>
+              <div className="flex-1 min-w-0">
+                {submitting ? (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{
+                        background: "var(--safari-gold)",
+                        animation: "pulse-glow 1s ease-in-out infinite",
+                      }}
+                    />
+                    <span
+                      className="font-display text-xs font-bold uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Submitting...
+                    </span>
+                  </div>
+                ) : rank?.rank != null ? (
+                  <>
+                    <div
+                      className="font-display text-lg font-black leading-none"
+                      style={{ color: "var(--safari-gold)" }}
+                    >
+                      #{rank.rank}
+                    </div>
+                    <div
+                      className="font-display text-xs font-bold uppercase tracking-widest"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      of {rank.total} today
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    className="text-xs font-bold"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Name on home to rank
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Sticker book with 3D spinning badges for correct */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+          className="mt-7 mb-6"
+        >
+          <p
+            className="font-display text-xs font-black uppercase tracking-[0.3em] mb-3 text-center"
+            style={{ color: "var(--safari-gold)" }}
+          >
+            Safari Badges
+          </p>
+          <div className="flex gap-3 justify-center flex-wrap">
+            {results.stickers.map((sticker, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, rotate: -8, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                transition={{ duration: 0.45, delay: 0.45 + i * 0.15, type: "spring" }}
+                className="w-28 h-32 sm:w-32 sm:h-36 rounded-2xl flex flex-col items-center justify-center gap-1 p-2 relative"
+                style={{
+                  background: sticker.correct
+                    ? "linear-gradient(180deg, rgba(244,167,43,0.25) 0%, rgba(244,167,43,0.1) 100%)"
+                    : "rgba(255, 244, 214, 0.06)",
+                  border: `3px solid ${
+                    sticker.correct ? "var(--safari-gold)" : "rgba(255, 244, 214, 0.18)"
+                  }`,
+                  borderBottomWidth: "6px",
+                  borderBottomColor: sticker.correct
+                    ? "var(--safari-gold-d)"
+                    : "rgba(255, 244, 214, 0.1)",
+                  filter: sticker.correct ? "none" : "grayscale(0.7) opacity(0.75)",
+                }}
+              >
+                {/* 3D medal hovers in top-right when correct */}
+                {sticker.correct && (
+                  <div className="absolute -top-4 -right-4">
+                    <SpinningBadge3D size={60} />
+                  </div>
+                )}
+                <span className="text-4xl sm:text-5xl">
+                  {sticker.emoji ?? "🐾"}
+                </span>
+                <span
+                  className="font-display text-xs font-black text-center leading-tight"
+                  style={{ color: "var(--safari-cream)" }}
+                >
+                  {sticker.animalName}
+                </span>
+                {sticker.correct ? (
+                  <span
+                    className="font-display text-xs font-black"
+                    style={{ color: "var(--leaf-bright)" }}
+                  >
+                    ✓ Tracked
+                  </span>
+                ) : (
+                  <span
+                    className="font-display text-xs font-bold"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    missed
+                  </span>
+                )}
+              </motion.div>
+            ))}
           </div>
         </motion.div>
-      )}
 
-      {/* Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-        className="w-full max-w-sm flex flex-col gap-3"
-      >
-        <button
-          onClick={() => {
-            sessionStorage.removeItem("gameResults");
-            router.push("/play?mode=practice");
-          }}
-          className="kid-btn text-lg"
-          style={{
-            background: "var(--kid-green)",
-            borderBottomColor: "var(--kid-green-d)",
-            padding: "1rem 1.5rem",
-          }}
-        >
-          Play again 🎧
-        </button>
-        <div className="flex gap-3">
-          <button
-            onClick={() => router.push("/leaderboard")}
-            className="kid-btn-soft flex-1"
-            style={{ padding: "0.85rem 1rem" }}
+        {/* Top 3 preview */}
+        {results.mode === "daily" && top3.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.55 }}
+            className="w-full max-w-md mb-6 rounded-2xl p-4"
+            style={{
+              background: "rgba(13, 59, 46, 0.6)",
+              border: "2px solid rgba(127, 176, 105, 0.3)",
+              borderBottomWidth: "4px",
+              borderBottomColor: "rgba(127, 176, 105, 0.15)",
+            }}
           >
-            🏆 Leaderboard
-          </button>
+            <p
+              className="font-display text-xs font-black uppercase tracking-[0.3em] mb-2 text-center"
+              style={{ color: "var(--safari-gold)" }}
+            >
+              Top 3 Today
+            </p>
+            <div className="space-y-1.5">
+              {top3.map((entry) => {
+                const medal =
+                  entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉";
+                return (
+                  <div
+                    key={`${entry.rank}-${entry.nickname}`}
+                    className="flex items-center justify-between text-sm font-bold"
+                  >
+                    <span style={{ color: "var(--safari-cream)" }}>
+                      {medal} {entry.nickname}
+                    </span>
+                    <span style={{ color: "var(--safari-gold)" }}>
+                      {entry.score}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+          className="w-full max-w-sm flex flex-col gap-3"
+        >
           <button
             onClick={() => {
               sessionStorage.removeItem("gameResults");
-              router.push("/");
+              router.push("/play?mode=practice");
             }}
-            className="kid-btn-soft flex-1"
-            style={{ padding: "0.85rem 1rem" }}
+            className="kid-btn font-display text-lg"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--safari-gold), var(--safari-amber))",
+              borderBottomColor: "var(--safari-amber-d)",
+              color: "var(--jungle-deep)",
+              padding: "1rem 1.5rem",
+            }}
           >
-            🏠 Home
+            Another safari 🌿
           </button>
-        </div>
-      </motion.div>
-    </main>
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/leaderboard")}
+              className="kid-btn-soft flex-1 font-display"
+              style={{ padding: "0.85rem 1rem" }}
+            >
+              🏆 Expedition log
+            </button>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem("gameResults");
+                router.push("/");
+              }}
+              className="kid-btn-soft flex-1 font-display"
+              style={{ padding: "0.85rem 1rem" }}
+            >
+              🏠 Basecamp
+            </button>
+          </div>
+        </motion.div>
+      </main>
+    </>
   );
 }
 
 function Confetti() {
-  const emojis = ["🎉", "🌟", "✨", "🎊", "⭐", "🌈", "🎈"];
+  const emojis = ["🎉", "🌟", "✨", "🎊", "⭐", "🌿", "🏆"];
   const pieces = Array.from({ length: 24 }, (_, i) => i);
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50" aria-hidden>
       {pieces.map((i) => {
         const left = Math.random() * 100;
         const delay = Math.random() * 0.6;

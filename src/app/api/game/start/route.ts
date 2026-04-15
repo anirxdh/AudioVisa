@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   createAnimalGame,
+  saveGame,
   ROUNDS_PER_GAME,
   type GameMode,
 } from "../../../../../lib/game-engine";
@@ -94,6 +95,9 @@ export async function POST(request: NextRequest) {
         options: round.options,
       };
     });
+
+    // Persist to Upstash so subsequent lambdas can find this game.
+    await saveGame(game);
 
     return NextResponse.json({
       gameId: game.id,

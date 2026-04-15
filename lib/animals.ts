@@ -144,7 +144,7 @@ export function buildAnimalOptions(correct: Animal): string[] {
 // Audio cache (single SFX per animal)
 // ---------------------------------------------------------------------------
 
-const IS_SERVERLESS = !!process.env.VERCEL;
+const IS_SERVERLESS = !!process.env.VERCEL || !!process.env.NETLIFY;
 const ANIMAL_AUDIO_DIR = IS_SERVERLESS
   ? path.join("/tmp", "animals")
   : path.join(process.cwd(), "public", "animals");

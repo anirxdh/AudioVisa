@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { gameStore } from "../../../../../lib/game-engine";
+import { getGame, saveGame } from "../../../../../lib/game-engine";
 import { getRedis, KEYS, todayKey } from "../../../../../lib/upstash";
 
 interface SubmitBody {
@@ -15,9 +15,8 @@ const DAILY_BOARD_TTL_SECONDS = 60 * 60 * 48; // 48h
  *
  * Body: { gameId, nickname }
  *
- * Submits the finished daily game's score. Deterministic member key
- * `{nickname}#{gameId}` means duplicate submits (React strict-mode
- * double-fire, refreshes) overwrite the same row instead of duplicating.
+ * Submits a finished daily game's score. Deterministic member key
+ * `{nickname}#{gameId}` so double-submits overwrite the same row.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const game = gameStore.get(gameId);
+    const game = await getGame(gameId);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
@@ -61,6 +60,7 @@ export async function POST(request: NextRequest) {
 
     game.submittedToLeaderboard = true;
     game.nickname = nickname;
+    await saveGame(game);
 
     const rank = await redis.zrevrank(boardKey, member);
     const total = await redis.zcard(boardKey);

@@ -1,30 +1,36 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Nunito, Fredoka } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({
-  variable: "--font-kid",
+const body = Nunito({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800", "900"],
+});
+
+const display = Fredoka({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://audiovisa.vercel.app"
   ),
-  title: "Audio Visa — Learn Animal Sounds",
+  title: "Audio Visa — The Jungle Safari",
   description:
-    "A playful audio game for little kids (ages 1–3). Listen to a sound, tap the animal, earn stickers. Built with ElevenLabs + turbopuffer.",
+    "A playful audio expedition for little explorers (ages 1–3). Hear the sound, tap the animal, collect safari badges. Built with ElevenLabs + turbopuffer.",
   openGraph: {
-    title: "Audio Visa — Learn Animal Sounds",
-    description: "Playful sound quiz for toddlers.",
+    title: "Audio Visa — The Jungle Safari",
+    description: "Hear it. Tap it. Collect safari badges.",
     type: "website",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Audio Visa — Learn Animal Sounds",
-    description: "Playful sound quiz for toddlers.",
+    title: "Audio Visa — The Jungle Safari",
+    description: "Hear it. Tap it. Collect safari badges.",
   },
 };
 
@@ -34,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} h-full antialiased`}>
+    <html lang="en" className={`${body.variable} ${display.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

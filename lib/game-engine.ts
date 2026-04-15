@@ -1,5 +1,6 @@
 import type { Animal } from "../types/animal";
 import { buildAnimalOptions } from "./animals";
+import { getRedis } from "./upstash";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -32,10 +33,29 @@ export interface GameState {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory game store (hackathon simplicity — no database)
+// Game store — Upstash-backed so state survives across serverless instances
 // ---------------------------------------------------------------------------
 
-export const gameStore = new Map<string, GameState>();
+/**
+ * Games expire after 1 hour. Plenty of time for a normal 3-round game
+ * (usually 2–5 minutes) while keeping the Upstash namespace clean.
+ */
+const GAME_TTL_SECONDS = 60 * 60;
+
+function gameKey(id: string): string {
+  return `audiovisa:game:${id}`;
+}
+
+export async function getGame(id: string): Promise<GameState | null> {
+  const redis = getRedis();
+  const state = await redis.get<GameState>(gameKey(id));
+  return state ?? null;
+}
+
+export async function saveGame(state: GameState): Promise<void> {
+  const redis = getRedis();
+  await redis.set(gameKey(state.id), state, { ex: GAME_TTL_SECONDS });
+}
 
 // ---------------------------------------------------------------------------
 // Game creation
@@ -86,7 +106,8 @@ export function createAnimalGame(opts: CreateGameOptions): GameState {
     submittedToLeaderboard: false,
   };
 
-  gameStore.set(game.id, game);
+  // Caller is responsible for `await saveGame(game)` — we don't make
+  // createAnimalGame async so it stays pure/testable.
   return game;
 }
 

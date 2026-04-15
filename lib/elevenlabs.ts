@@ -95,3 +95,35 @@ export async function generateMusic(
 
   return streamToBuffer(stream);
 }
+
+// ---------------------------------------------------------------------------
+// Text-to-Speech (kid-friendly mascot voice)
+// ---------------------------------------------------------------------------
+
+/**
+ * Warm, friendly English female voice — good default for a kids' mascot.
+ * Override with ELEVENLABS_MASCOT_VOICE_ID if you want a different voice.
+ */
+const DEFAULT_MASCOT_VOICE = "EXAVITQu4vr4xnSDxMaL"; // "Bella"
+
+/**
+ * Convert a short text line into a spoken audio Buffer (mp3).
+ * Used to generate per-round mascot feedback.
+ */
+export async function generateSpeech(text: string): Promise<Buffer> {
+  const voiceId =
+    process.env.ELEVENLABS_MASCOT_VOICE_ID || DEFAULT_MASCOT_VOICE;
+
+  const stream = await getClient().textToSpeech.convert(voiceId, {
+    text,
+    modelId: "eleven_multilingual_v2",
+    outputFormat: "mp3_44100_128",
+    voiceSettings: {
+      stability: 0.5,
+      similarityBoost: 0.8,
+      style: 0.3,
+    },
+  });
+
+  return streamToBuffer(stream);
+}
