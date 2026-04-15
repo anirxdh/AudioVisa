@@ -22,11 +22,13 @@ import { getAllAnimals } from "../lib/animals";
 import { getOrGenerateFeedback } from "../lib/feedback";
 
 function pickDecoyIdsForAnimal(animal: Animal, all: Animal[]): string[] {
-  const sameCategory = all.filter(
-    (a) => a.category === animal.category && a.id !== animal.id
-  );
-  // Warm the 3 most plausible same-category decoys
-  return sameCategory.slice(0, 3).map((a) => a.id);
+  // Warm EVERY same-category decoy — these are the only wrong answers the
+  // MC options picker ever shows, so this guarantees zero live-generation
+  // for any plausible guess. Across the dataset this is ~350 pairs
+  // (~$8 one-time warm-up).
+  return all
+    .filter((a) => a.category === animal.category && a.id !== animal.id)
+    .map((a) => a.id);
 }
 
 async function main() {

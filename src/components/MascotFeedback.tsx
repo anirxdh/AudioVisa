@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 /**
  * Mascot feedback card shown on the reveal phase.
  *
- * Flow:
- *   1. Mount with { animalId, guessId, correct } → fetch /api/feedback.
- *   2. When audio arrives, play it and animate the mascot "talking".
- *   3. The "Next" button is disabled until audio ends (or user skips after 2s).
- *   4. onContinue is the parent's handler that advances to next round.
+ * UX intent:
+ *   - Visual reveal (emoji, correct/wrong banner, Next button) appears
+ *     IMMEDIATELY — never blocked on the network.
+ *   - /api/feedback runs in parallel. When text + audio arrive, the speech
+ *     bubble fades in and audio plays in the background.
+ *   - The Next button is never disabled waiting on audio — kids can
+ *     advance whenever. Clicking Next stops any playing audio.
  */
 
 interface MascotFeedbackProps {
@@ -34,23 +36,13 @@ export default function MascotFeedback({
   isLastRound,
   onContinue,
 }: MascotFeedbackProps) {
-  const [loading, setLoading] = useState(true);
   const [text, setText] = useState<string | null>(null);
   const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
-  const [audioEnded, setAudioEnded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [skipAllowed, setSkipAllowed] = useState(false);
-  const [error, setError] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fetchedRef = useRef(false);
 
-  // Allow "skip" after 2s for impatient kids/parents
-  useEffect(() => {
-    const t = setTimeout(() => setSkipAllowed(true), 2000);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Fetch feedback on mount (StrictMode-safe)
+  // Fetch feedback in the background — never blocks the UI.
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
@@ -62,15 +54,13 @@ export default function MascotFeedback({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ animalId, guessId, correct }),
         });
-        if (!res.ok) throw new Error("feedback failed");
+        if (!res.ok) return;
         const data = await res.json();
         if (cancelled) return;
         setText(data.text);
         setAudioDataUrl(data.audioDataUrl);
       } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
+        /* silent — reveal UI is already shown */
       }
     })();
     return () => {
@@ -78,27 +68,18 @@ export default function MascotFeedback({
     };
   }, [animalId, guessId, correct]);
 
-  // Play audio when URL arrives
+  // Play audio as soon as it arrives — non-blocking.
   useEffect(() => {
     if (!audioDataUrl) return;
     const audio = new Audio(audioDataUrl);
     audioRef.current = audio;
-    const onEnded = () => {
-      setIsPlaying(false);
-      setAudioEnded(true);
-    };
-    const onError = () => {
-      setIsPlaying(false);
-      setAudioEnded(true); // unblock Next button
-    };
+    const onEnded = () => setIsPlaying(false);
+    const onError = () => setIsPlaying(false);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
     audio.play().then(
       () => setIsPlaying(true),
-      () => {
-        // Autoplay blocked — unlock Next so the user can continue
-        setAudioEnded(true);
-      }
+      () => setIsPlaying(false) // autoplay blocked, ignore silently
     );
     return () => {
       audio.pause();
@@ -107,17 +88,8 @@ export default function MascotFeedback({
     };
   }, [audioDataUrl]);
 
-  // If OpenAI/ElevenLabs failed, auto-unlock so the game never stalls
-  useEffect(() => {
-    if (error) setAudioEnded(true);
-  }, [error]);
-
-  const canAdvance = audioEnded || skipAllowed || error;
-
   function handleContinue() {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    if (audioRef.current) audioRef.current.pause();
     onContinue();
   }
 
@@ -128,7 +100,7 @@ export default function MascotFeedback({
       transition={{ duration: 0.45 }}
       className="w-full max-w-lg flex flex-col items-center gap-5"
     >
-      {/* Outcome banner + big emoji */}
+      {/* Outcome banner + big emoji — INSTANT */}
       <motion.div
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -167,112 +139,72 @@ export default function MascotFeedback({
         )}
       </motion.div>
 
-      {/* Mascot speech bubble */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="w-full rounded-3xl p-5 flex items-start gap-3"
+      {/* Mascot speech bubble — fades in ONLY when text is ready */}
+      <AnimatePresence>
+        {text && (
+          <motion.div
+            key="bubble"
+            initial={{ opacity: 0, y: 10, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full rounded-3xl p-5 flex items-start gap-3"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255, 244, 214, 0.98) 0%, rgba(235, 215, 167, 0.96) 100%)",
+              border: "2px solid var(--safari-gold)",
+              borderBottomWidth: "5px",
+              borderBottomColor: "var(--safari-gold-d)",
+              color: "var(--jungle-deep)",
+            }}
+          >
+            <motion.div
+              animate={
+                isPlaying
+                  ? { rotate: [-3, 3, -3], scale: [1, 1.05, 1] }
+                  : { rotate: 0, scale: 1 }
+              }
+              transition={{ duration: 0.6, repeat: isPlaying ? Infinity : 0 }}
+              className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+              style={{
+                background: "var(--safari-gold)",
+                border: "2px solid var(--safari-gold-d)",
+              }}
+            >
+              🦉
+            </motion.div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-bold leading-snug">{text}</p>
+              {isPlaying && (
+                <div className="mt-2 flex items-center gap-1">
+                  <span className="text-xs font-black uppercase tracking-widest opacity-65">
+                    🔊 speaking
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Next button — always enabled */}
+      <motion.button
+        onClick={handleContinue}
+        whileHover={{ y: -2, scale: 1.02 }}
+        whileTap={{ y: 2, scale: 0.98 }}
+        className="kid-btn font-display"
         style={{
           background:
-            "linear-gradient(135deg, rgba(255, 244, 214, 0.98) 0%, rgba(235, 215, 167, 0.96) 100%)",
-          border: "2px solid var(--safari-gold)",
-          borderBottomWidth: "5px",
-          borderBottomColor: "var(--safari-gold-d)",
+            "linear-gradient(135deg, var(--safari-gold) 0%, var(--safari-amber) 100%)",
+          borderBottomColor: "var(--safari-amber-d)",
           color: "var(--jungle-deep)",
+          padding: "1rem 2rem",
+          fontSize: "1.05rem",
+          minWidth: "220px",
         }}
       >
-        {/* Mascot avatar */}
-        <motion.div
-          animate={
-            isPlaying
-              ? { rotate: [-3, 3, -3], scale: [1, 1.05, 1] }
-              : { rotate: 0, scale: 1 }
-          }
-          transition={{ duration: 0.6, repeat: isPlaying ? Infinity : 0 }}
-          className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
-          style={{
-            background: "var(--safari-gold)",
-            border: "2px solid var(--safari-gold-d)",
-          }}
-        >
-          🦉
-        </motion.div>
-
-        {/* Bubble content */}
-        <div className="flex-1 min-w-0">
-          {loading ? (
-            <div className="flex items-center gap-2 h-6">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="w-2 h-2 rounded-full"
-                  style={{
-                    background: "var(--jungle-dark)",
-                    animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
-                  }}
-                />
-              ))}
-            </div>
-          ) : error ? (
-            <p className="text-sm font-bold">
-              {correct
-                ? `Yes! Great job — that&apos;s a ${correctName}!`
-                : `Not quite — the answer was ${correctName}.`}
-            </p>
-          ) : (
-            <AnimatePresence>
-              <motion.p
-                key="text"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.35 }}
-                className="text-base font-bold leading-snug"
-              >
-                {text}
-              </motion.p>
-            </AnimatePresence>
-          )}
-
-          {/* Speaker indicator */}
-          {isPlaying && (
-            <div className="mt-2 flex items-center gap-1">
-              <span className="text-xs font-black uppercase tracking-widest opacity-70">
-                🔊 Speaking
-              </span>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Next / Skip button */}
-      <div className="w-full flex flex-col sm:flex-row gap-3 items-center justify-center">
-        <motion.button
-          onClick={handleContinue}
-          disabled={!canAdvance}
-          whileHover={canAdvance ? { y: -2, scale: 1.02 } : {}}
-          whileTap={canAdvance ? { y: 2, scale: 0.98 } : {}}
-          className="kid-btn font-display"
-          style={{
-            background: canAdvance
-              ? "linear-gradient(135deg, var(--safari-gold) 0%, var(--safari-amber) 100%)"
-              : "rgba(255, 244, 214, 0.15)",
-            borderBottomColor: canAdvance
-              ? "var(--safari-amber-d)"
-              : "rgba(255, 244, 214, 0.2)",
-            color: canAdvance ? "var(--jungle-deep)" : "var(--text-muted)",
-            padding: "1rem 2rem",
-            fontSize: "1.05rem",
-            minWidth: "220px",
-          }}
-        >
-          {!canAdvance
-            ? "Listen..."
-            : isLastRound
-            ? "See my safari log →"
-            : "Next round →"}
-        </motion.button>
-      </div>
+        {isLastRound ? "See my safari log →" : "Next round →"}
+      </motion.button>
     </motion.div>
   );
 }

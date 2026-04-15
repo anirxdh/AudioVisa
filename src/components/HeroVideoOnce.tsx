@@ -3,53 +3,51 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 /**
- * One-time cinematic hero video for the landing page.
+ * One-time cinematic hero for the landing page.
  *
- * - Autoplays muted inline on mount.
- * - Plays through ONCE. When it ends, pauses on the final frame (does NOT loop).
- * - Covers the entire viewport.
- * - An invisible clickable button overlays the video (either whole area or a
- *   targeted rect matching the "Let's Go!" graphic if `hotspot` is provided).
- * - Button is disabled for `lockoutMs` after mount (default 1000ms) to prevent
- *   trigger-happy toddlers from scrolling before the intro plays.
- * - onClick → smooth-scrolls to `scrollTargetId` (default "app").
- *
- * If the video fails to load (404 / autoplay blocked), a gradient fallback
- * covers the screen and the button still works.
+ * - Autoplays the video muted inline; freezes on the final frame (no loop).
+ * - Full invisible click overlay — any tap on the hero counts as pressing
+ *   the painted "Let's Go!" button inside the video.
+ * - Locked for `lockoutMs` after mount (default 1000ms) so toddlers don't
+ *   accidentally skip the intro.
+ * - Body scroll is disabled while the hero owns the viewport; once clicked,
+ *   we smooth-scroll to `scrollTargetId` over `scrollDurationMs` and free
+ *   the scroll.
+ * - Return visitors (localStorage flag) bypass the lock immediately.
  */
 interface HeroVideoOnceProps {
   src?: string;
   scrollTargetId?: string;
   lockoutMs?: number;
-  /**
-   * Optional: percentage-based rect over the video where the button should be.
-   * Defaults to the whole video (any click on the hero triggers scroll).
-   */
-  hotspot?: {
-    topPct: number;
-    leftPct: number;
-    widthPct: number;
-    heightPct: number;
-  };
+  scrollDurationMs?: number;
 }
 
 export default function HeroVideoOnce({
   src = "/hero.mp4",
   scrollTargetId = "app",
   lockoutMs = 1000,
+  scrollDurationMs = 2000,
 }: HeroVideoOnceProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [locked, setLocked] = useState(true);
 
-  // 1s lockout to prevent accidental scroll during intro
+  // Lock body scroll until the user clicks into the app.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(() => setLocked(false), lockoutMs);
     return () => clearTimeout(t);
   }, [lockoutMs]);
 
-  // Try to autoplay; fall back to gradient if blocked
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
@@ -66,10 +64,29 @@ export default function HeroVideoOnce({
   const handleClick = useCallback(() => {
     if (locked) return;
     const target = document.getElementById(scrollTargetId);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!target) return;
+    try {
+      localStorage.setItem("audiovisa:visited", "1");
+    } catch {
+      /* ignore */
     }
-  }, [locked, scrollTargetId]);
+    document.body.style.overflow = "";
+    const startY = window.scrollY;
+    const endY = target.getBoundingClientRect().top + window.scrollY;
+    const distance = endY - startY;
+    const duration = scrollDurationMs;
+    const startTime = performance.now();
+    function step(now: number) {
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      // easeInOutCubic — slow start, fast middle, slow end
+      const eased =
+        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      window.scrollTo(0, startY + distance * eased);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }, [locked, scrollTargetId, scrollDurationMs]);
 
   return (
     <section
@@ -77,7 +94,7 @@ export default function HeroVideoOnce({
       style={{ height: "100vh" }}
       aria-label="Welcome to Audio Visa Safari"
     >
-      {/* Gradient fallback — always rendered behind so we never see nothing */}
+      {/* Gradient fallback — always rendered behind */}
       <div className="absolute inset-0 -z-10">
         <div
           className="absolute inset-0"
@@ -110,7 +127,7 @@ export default function HeroVideoOnce({
         />
       </div>
 
-      {/* Video layer */}
+      {/* Video fills the whole hero */}
       {!videoFailed && (
         <video
           ref={videoRef}
@@ -124,7 +141,6 @@ export default function HeroVideoOnce({
           onCanPlay={() => setVideoReady(true)}
           onError={() => setVideoFailed(true)}
           onEnded={(e) => {
-            // Freeze on last frame — pause explicitly so it doesn't auto-restart.
             const vid = e.currentTarget;
             try {
               vid.pause();
@@ -135,32 +151,52 @@ export default function HeroVideoOnce({
         />
       )}
 
-      {/* Invisible click overlay — covers entire hero so any click triggers scroll */}
+      {/* Invisible click surface — any tap on the hero triggers scroll */}
       <button
         type="button"
         onClick={handleClick}
         disabled={locked}
         aria-label="Let's Go"
         className="absolute inset-0 w-full h-full cursor-pointer disabled:cursor-not-allowed"
-        style={{
-          background: "transparent",
-          border: "none",
-          zIndex: 5,
-        }}
+        style={{ background: "transparent", border: "none", zIndex: 5 }}
       />
 
-      {/* Tiny helper label for accessibility + for kids who scroll with keyboard */}
+      {/* Dark pill caption at the bottom — darker, higher contrast */}
       <div
-        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-xs font-black uppercase tracking-[0.3em]"
-        style={{
-          color: "rgba(255, 244, 214, 0.7)",
-          textShadow: "0 2px 8px rgba(0,0,0,0.6)",
-          animation: "pulse-glow 2s ease-in-out infinite",
-          opacity: locked ? 0.3 : 1,
-          transition: "opacity 0.4s",
-        }}
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2"
+        style={{ bottom: "4vh", zIndex: 6 }}
       >
-        {locked ? "Starting..." : "Tap the safari — let's go! ↓"}
+        <div
+          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full font-display text-[11px] sm:text-xs font-black uppercase tracking-[0.3em]"
+          style={{
+            background: "rgba(6, 18, 12, 0.82)",
+            border: "1px solid rgba(244, 167, 43, 0.5)",
+            color: locked ? "rgba(255, 244, 214, 0.55)" : "var(--safari-gold)",
+            boxShadow: "0 8px 24px -6px rgba(0, 0, 0, 0.7)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            transition: "color 0.3s ease",
+          }}
+        >
+          {locked ? (
+            <>
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: "rgba(244, 167, 43, 0.7)",
+                  animation: "pulse-glow 1s ease-in-out infinite",
+                }}
+              />
+              Starting...
+            </>
+          ) : (
+            <>
+              <span className="text-base leading-none">🌿</span>
+              Tap anywhere to enter the safari
+              <span className="text-base leading-none">↓</span>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );
