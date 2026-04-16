@@ -14,6 +14,48 @@ Built for **#ElevenHacks** with **[ElevenLabs](https://elevenlabs.io)** + **[tur
 
 ---
 
+## 🏆 #ElevenHacks Submission
+
+**The creative combination — turbopuffer × ElevenLabs, working together:**
+
+A toddler hears an **ElevenLabs Sound Effects**-generated animal cry, picks
+an answer, and immediately receives a **personalized, context-aware voice
+response** — different every time, based on exactly what they picked wrong
+versus what the right answer was. The mascot reasoning is GPT-4o-mini; the
+voice is **ElevenLabs Text-to-Speech** ("Bella"). Every unique
+(correct animal, wrong guess) pairing is cached in Upstash as base64
+audio, so the response is **instant** on every future play for every user
+globally — no cold starts, no re-generation costs.
+
+**Where turbopuffer fits in the audio pipeline:**
+
+All 55 animals are embedded with OpenAI `text-embedding-3-small` and indexed
+in the `audiovisa-animals` namespace, with rich metadata attached (category,
+description, fun-fact). This lets us run **ANN queries by theme** — "jungle
+predators", "things that buzz", "farm animals at dawn" — and curate custom
+themed audio expeditions at runtime. It's RAG for audio: vector search over
+the animal library feeds directly into ElevenLabs sound + voice generation
+for the matching clips.
+
+**Why this combination is novel:**
+
+- **Two ElevenLabs APIs in one product.** Sound Effects for the animal
+  cries; Text-to-Speech for the mascot. Each serves a completely different
+  emotional purpose — mystery (what's that sound?) and warmth (the mascot's
+  voice explaining it).
+- **Vector search shapes the audio.** turbopuffer isn't a bolt-on; the
+  animal picks that drive every ElevenLabs call flow through the vector
+  index. Replay, theming, and recommendations all happen in the vector
+  layer before any audio plays.
+- **Global cache layer.** Upstash Redis holds every pre-generated pairing
+  so that the same mascot response never has to be computed twice, across
+  every user worldwide. ~350 pairings are pre-warmed for ~$5 one-time.
+
+**Live demo:** [thejunglesafari.netlify.app](https://thejunglesafari.netlify.app)
+· Tagged **#ElevenHacks** on submission.
+
+---
+
 ## The kid's experience
 
 1. **Land on the safari** — a one-time cinematic hero video freezes on a "Let's Go!" frame. Tap anywhere → smooth scroll down to the expedition basecamp.
