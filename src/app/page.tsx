@@ -153,10 +153,19 @@ export default function Home() {
     }
   }
 
+  const [nameWarning, setNameWarning] = useState(false);
+
   function startMode(mode: "daily" | "practice") {
     // Require a valid nickname for BOTH modes
     if (!nick.trim() || !NICKNAME_RE.test(nick.trim())) {
+      setNameWarning(true);
       document.getElementById("nick-input")?.focus();
+      document.getElementById("nick-input")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      // auto-clear after 4s
+      setTimeout(() => setNameWarning(false), 4000);
       return;
     }
     setNavigating(mode);
@@ -229,7 +238,11 @@ export default function Home() {
                   nick={nick}
                   nickValid={nickValid}
                   nickSaved={nickSaved}
-                  onChange={handleNickChange}
+                  warning={nameWarning}
+                  onChange={(v) => {
+                    handleNickChange(v);
+                    if (v.trim()) setNameWarning(false);
+                  }}
                 />
 
                 {dailyDone ? (
@@ -447,11 +460,13 @@ function ExplorerProfileCard({
   nick,
   nickValid,
   nickSaved,
+  warning,
   onChange,
 }: {
   nick: string;
   nickValid: boolean;
   nickSaved: boolean;
+  warning?: boolean;
   onChange: (v: string) => void;
 }) {
   return (
@@ -462,7 +477,17 @@ function ExplorerProfileCard({
       transition={{ duration: 0.5, delay: 0.1 }}
       className="mx-auto w-full max-w-xl"
     >
-      <div className="premium-card px-5 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row items-center gap-4">
+      <motion.div
+        animate={warning ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="premium-card px-5 py-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row items-center gap-4"
+        style={{
+          borderColor: warning ? "var(--safari-coral)" : undefined,
+          boxShadow: warning
+            ? "0 0 0 2px rgba(231, 111, 81, 0.35), 0 32px 64px -24px rgba(231, 111, 81, 0.4)"
+            : undefined,
+        }}
+      >
         <div
           className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
           style={{
@@ -514,7 +539,18 @@ function ExplorerProfileCard({
               color: "var(--jungle-deep)",
             }}
           />
-          {nick.length > 0 && !nickValid && (
+          {warning && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-xs font-black mt-1.5 flex items-center gap-1.5"
+              style={{ color: "var(--safari-coral)" }}
+            >
+              <span>⚠️</span>
+              <span>Please type a name first so we know who the explorer is!</span>
+            </motion.p>
+          )}
+          {!warning && nick.length > 0 && !nickValid && (
             <p
               className="text-xs font-bold mt-1.5"
               style={{ color: "var(--safari-gold)" }}
@@ -523,7 +559,7 @@ function ExplorerProfileCard({
             </p>
           )}
         </div>
-      </div>
+      </motion.div>
     </motion.section>
   );
 }
