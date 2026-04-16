@@ -14,24 +14,11 @@ interface Round {
   animalId: string;
   audioUrl: string | null;
   options: string[];
-}
-
-interface CorrectAnswer {
-  id: string;
-  name: string;
-  emoji: string;
-  category: string;
-  description: string;
-  funFact: string;
-}
-
-interface RoundResult {
-  score: number;
-  correct: boolean;
-  correctAnswer: CorrectAnswer;
-  totalScore: number;
-  gameStatus: string;
-  performanceRating: string | null;
+  correctName: string;
+  correctEmoji: string;
+  correctDescription: string;
+  correctFunFact: string;
+  correctCategory: string;
 }
 
 interface StickerEntry {
@@ -73,14 +60,14 @@ function PlayPageInner() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Map of option name → animalId (used for feedback guessId)
-  const [optionIdMap] = useState<Map<string, string>>(new Map());
-
   const [pickedOption, setPickedOption] = useState<string | null>(null);
-  const [revealData, setRevealData] = useState<RoundResult | null>(null);
+  const [revealCorrect, setRevealCorrect] = useState<boolean | null>(null);
   const [stickers, setStickers] = useState<StickerEntry[]>([]);
+  const [totalScore, setTotalScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const submitLockRef = useRef(false);
+
+  // Name → ID map for feedback guessId lookup
+  const [nameToId, setNameToId] = useState<Map<string, string>>(new Map());
 
   // ─── Start game ────────────────────────────────────────
   const startGame = useCallback(async () => {
@@ -101,6 +88,24 @@ function PlayPageInner() {
       setRounds(data.rounds);
       setCurrentRound(0);
       setStickers([]);
+      setTotalScore(0);
+
+      // Pre-fetch ALL audio for ALL rounds in parallel (fire-and-forget)
+      prefetchAllAudio(data.rounds);
+
+      // Pre-warm feedback for ALL rounds in parallel
+      prewarmAllFeedback(data.gameId, data.rounds);
+
+      // Build name → id map for feedback
+      const mod = await import("../../../data/animals.json");
+      const animals = (
+        mod.default as { animals: { id: string; name: string }[] }
+      ).animals;
+      const map = new Map<string, string>();
+      for (const a of animals) map.set(a.name, a.id);
+      setNameToId(map);
+
+      // Load first round audio
       await loadAudio(data.rounds[0]);
       setPhase("playing");
     } catch (err) {
@@ -109,6 +114,51 @@ function PlayPageInner() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, challengeId]);
+
+  function prefetchAllAudio(roundList: Round[]) {
+    for (const round of roundList) {
+      if (round.audioUrl) {
+        // Warm browser cache with a preload
+        const a = new Audio();
+        a.preload = "auto";
+        a.src = round.audioUrl;
+      } else {
+        // Generate on-demand and warm
+        fetch("/api/animal/audio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ animalId: round.animalId }),
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data?.audioUrl) {
+              setRounds((prev) =>
+                prev.map((r) =>
+                  r.animalId === round.animalId
+                    ? { ...r, audioUrl: data.audioUrl }
+                    : r
+                )
+              );
+              // Also preload into browser cache
+              const a = new Audio();
+              a.preload = "auto";
+              a.src = data.audioUrl;
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }
+
+  function prewarmAllFeedback(gId: string, roundList: Round[]) {
+    for (let i = 0; i < roundList.length; i++) {
+      fetch("/api/feedback/prewarm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId: gId, roundIndex: i }),
+      }).catch(() => {});
+    }
+  }
 
   async function loadAudio(round: Round) {
     setAudioUrl(null);
@@ -128,7 +178,9 @@ function PlayPageInner() {
         setAudioUrl(data.audioUrl);
         setRounds((prev) =>
           prev.map((r) =>
-            r.animalId === round.animalId ? { ...r, audioUrl: data.audioUrl } : r
+            r.animalId === round.animalId
+              ? { ...r, audioUrl: data.audioUrl }
+              : r
           )
         );
       }
@@ -162,9 +214,7 @@ function PlayPageInner() {
     const promise = audioRef.current.play();
     setIsPlaying(true);
     if (promise && typeof promise.catch === "function") {
-      promise.catch(() => {
-        setIsPlaying(false);
-      });
+      promise.catch(() => setIsPlaying(false));
     }
   }
 
@@ -173,90 +223,56 @@ function PlayPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]);
 
-  // Preload next round's audio during reveal phase
-  useEffect(() => {
-    if (!revealData) return;
-    const next = rounds[currentRound + 1];
-    if (!next || next.audioUrl) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/animal/audio", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ animalId: next.animalId }),
-        });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        setRounds((prev) =>
-          prev.map((r) =>
-            r.animalId === next.animalId ? { ...r, audioUrl: data.audioUrl } : r
-          )
-        );
-      } catch {
-        /* best effort */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [revealData, rounds, currentRound]);
+  // ─── Pick an animal — INSTANT local check ────────────────────
+  function handlePick(option: string) {
+    if (!gameId || pickedOption) return;
+    const round = rounds[currentRound];
+    if (!round) return;
 
-  // ─── Pick an animal ────────────────────────────────────
-  async function handlePick(option: string) {
-    if (!gameId || pickedOption || submitLockRef.current) return;
-    submitLockRef.current = true;
     setPickedOption(option);
     stopAudio();
-    try {
-      const res = await fetch("/api/game/guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId, roundIndex: currentRound, guess: option }),
-      });
-      if (!res.ok) throw new Error("submit failed");
-      const data: RoundResult = await res.json();
-      setRevealData(data);
 
-      if (data.correct) {
-        addSticker(data.correctAnswer.id);
-      }
+    // Instant local check — no server wait
+    const correct = option === round.correctName;
+    setRevealCorrect(correct);
 
-      setStickers((prev) => [
-        ...prev,
-        {
-          animalName: data.correctAnswer.name,
-          emoji: data.correctAnswer.emoji,
-          correct: data.correct,
-          guessed: option,
-        },
-      ]);
-    } catch (err) {
-      console.error(err);
-      setError("Oops, try again.");
-      submitLockRef.current = false;
-      setPickedOption(null);
-    }
+    const score = correct ? 1000 : 0;
+    setTotalScore((prev) => prev + score);
+
+    if (correct) addSticker(round.animalId);
+
+    setStickers((prev) => [
+      ...prev,
+      {
+        animalName: round.correctName,
+        emoji: round.correctEmoji,
+        correct,
+        guessed: option,
+      },
+    ]);
+
+    // Fire server update in BACKGROUND (for leaderboard/state tracking)
+    fetch("/api/game/guess", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gameId, roundIndex: currentRound, guess: option }),
+    }).catch(() => {});
   }
 
-  // Advance — called by MascotFeedback when audio finishes (or user hits skip/next)
+  // Advance — called by MascotFeedback when audio finishes
   function advanceRound() {
-    submitLockRef.current = false;
-    if (
-      revealData?.gameStatus === "finished" ||
-      currentRound + 1 >= rounds.length
-    ) {
-      finishGame(revealData!);
+    const nextIdx = currentRound + 1;
+    if (nextIdx >= rounds.length) {
+      finishGame();
     } else {
       setPickedOption(null);
-      setRevealData(null);
-      const next = currentRound + 1;
-      setCurrentRound(next);
-      loadAudio(rounds[next]);
+      setRevealCorrect(null);
+      setCurrentRound(nextIdx);
+      loadAudio(rounds[nextIdx]);
     }
   }
 
-  function finishGame(lastResult: RoundResult) {
+  function finishGame() {
     let newStreak = 0;
     if (mode === "daily") {
       markDailyPlayed();
@@ -266,8 +282,15 @@ function PlayPageInner() {
       gameId,
       mode,
       challengeId,
-      totalScore: lastResult.totalScore,
-      performanceRating: lastResult.performanceRating,
+      totalScore,
+      performanceRating:
+        totalScore >= 3000
+          ? "Animal Expert!"
+          : totalScore >= 2000
+          ? "Great job!"
+          : totalScore >= 1000
+          ? "Nice try!"
+          : "Let's try again!",
       stickers,
       streak: newStreak,
     };
@@ -283,35 +306,14 @@ function PlayPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Build a guessId (animalId) from the picked option name. We need
-  // data/animals.json for the lookup — imported on the server in /api/animal/audio
-  // but for the UI we can match from the current round options + correct answer.
-  // Since /api/game/guess already tells us the correctAnswer.id, we derive guessId
-  // differently: if the picked name IS the correct answer, guessId === correct.id;
-  // otherwise we look up the id via a fetch (but for simplicity, pass the name
-  // through — server-side /api/feedback does the lookup by name too).
-  // To keep things tight, we stuff the id on the client via a small helper below.
-  //
-  // Simpler approach: load animals.json on the client for name → id lookup.
-  // (Bundle impact is tiny — 55 animals.)
-  useEffect(() => {
-    (async () => {
-      if (optionIdMap.size > 0) return;
-      const mod = await import("../../../data/animals.json");
-      const animals = (mod.default as { animals: { id: string; name: string }[] })
-        .animals;
-      for (const a of animals) optionIdMap.set(a.name, a.id);
-    })();
-  }, [optionIdMap]);
-
   const round = rounds[currentRound];
   const isLastRound = currentRound + 1 >= rounds.length;
 
   const guessIdForFeedback =
-    pickedOption && revealData
-      ? revealData.correct
-        ? revealData.correctAnswer.id
-        : optionIdMap.get(pickedOption) ?? null
+    pickedOption && revealCorrect !== null
+      ? revealCorrect
+        ? null // correct = no guessId needed
+        : nameToId.get(pickedOption) ?? null
       : null;
 
   return (
@@ -342,7 +344,12 @@ function PlayPageInner() {
             className="kid-card w-full max-w-md mb-6 text-center"
             style={{ borderColor: "var(--safari-coral)" }}
           >
-            <p className="font-bold mb-3" style={{ color: "var(--safari-coral)" }}>{error}</p>
+            <p
+              className="font-bold mb-3"
+              style={{ color: "var(--safari-coral)" }}
+            >
+              {error}
+            </p>
             <button
               onClick={() => {
                 setError(null);
@@ -389,7 +396,7 @@ function PlayPageInner() {
             </motion.div>
           )}
 
-          {phase === "playing" && round && !revealData && (
+          {phase === "playing" && round && revealCorrect === null && (
             <motion.div
               key={`round-${currentRound}`}
               initial={{ opacity: 0, y: 15 }}
@@ -413,44 +420,31 @@ function PlayPageInner() {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {round.options.map((option) => {
-                  const picked = pickedOption === option;
-                  return (
-                    <motion.button
-                      key={option}
-                      whileHover={pickedOption ? {} : { y: -2 }}
-                      whileTap={pickedOption ? {} : { y: 2 }}
-                      onClick={() => handlePick(option)}
-                      disabled={!!pickedOption}
-                      className="kid-tile font-display"
-                      style={{
-                        borderColor: picked ? "var(--safari-gold)" : undefined,
-                        borderBottomColor: picked
-                          ? "var(--safari-gold-d)"
-                          : undefined,
-                        background: picked
-                          ? "rgba(244, 167, 43, 0.15)"
-                          : undefined,
-                      }}
-                    >
-                      <span className="flex-1">{option}</span>
-                    </motion.button>
-                  );
-                })}
+                {round.options.map((option) => (
+                  <motion.button
+                    key={option}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ y: 2 }}
+                    onClick={() => handlePick(option)}
+                    className="kid-tile font-display"
+                  >
+                    <span className="flex-1">{option}</span>
+                  </motion.button>
+                ))}
               </div>
             </motion.div>
           )}
 
-          {phase === "playing" && revealData && (
+          {phase === "playing" && round && revealCorrect !== null && (
             <MascotFeedback
               key={`reveal-${currentRound}`}
-              animalId={revealData.correctAnswer.id}
+              animalId={round.animalId}
               guessId={guessIdForFeedback}
-              correct={revealData.correct}
-              correctName={revealData.correctAnswer.name}
-              correctEmoji={revealData.correctAnswer.emoji}
+              correct={revealCorrect}
+              correctName={round.correctName}
+              correctEmoji={round.correctEmoji}
               pickedName={
-                pickedOption && !revealData.correct ? pickedOption : null
+                pickedOption && !revealCorrect ? pickedOption : null
               }
               isLastRound={isLastRound}
               onContinue={advanceRound}
@@ -533,7 +527,9 @@ function SpeakerCard({
                     height: `${base}%`,
                     opacity: playing ? 0.95 : 0.55,
                     animation: playing
-                      ? `pulse-glow ${0.7 + i * 0.07}s ease-in-out ${i * 0.08}s infinite`
+                      ? `pulse-glow ${0.7 + i * 0.07}s ease-in-out ${
+                          i * 0.08
+                        }s infinite`
                       : "none",
                   }}
                 />

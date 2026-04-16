@@ -84,7 +84,9 @@ export async function POST(request: NextRequest) {
       challengeId: body.challengeId ?? null,
     });
 
-    // Attach cached audio URLs where available (no generation here).
+    // Attach cached audio URLs + correct answer (safe: target audience is
+    // toddlers, not hackers). This lets the client check correct/wrong
+    // INSTANTLY without a server round-trip.
     const roundsForClient = game.rounds.map((round) => {
       const audioUrl = getCachedAnimalAudioUrl(round.animal.id);
       round.audioUrl = audioUrl;
@@ -93,6 +95,11 @@ export async function POST(request: NextRequest) {
         animalId: round.animal.id,
         audioUrl,
         options: round.options,
+        correctName: round.animal.name,
+        correctEmoji: round.animal.emoji,
+        correctDescription: round.animal.description,
+        correctFunFact: round.animal.funFact,
+        correctCategory: round.animal.category,
       };
     });
 

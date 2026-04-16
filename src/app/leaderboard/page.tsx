@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import SafariBackground from "@/components/SafariBackground";
-
-const Trophy3D = dynamic(() => import("@/components/Trophy3D"), {
-  ssr: false,
-  loading: () => null,
-});
 
 interface LeaderboardEntry {
   rank: number;
@@ -50,7 +44,7 @@ export default function LeaderboardPage() {
           transition={{ duration: 0.5 }}
           className="text-center mb-6 flex flex-col items-center"
         >
-          <Trophy3D size={180} />
+          <span className="text-7xl sm:text-8xl">🏆</span>
           <p
             className="font-display text-[11px] uppercase tracking-[0.4em] mt-2"
             style={{ color: "rgba(255, 244, 214, 0.7)" }}

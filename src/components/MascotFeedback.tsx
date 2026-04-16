@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 /**
  * Mascot feedback card shown on the reveal phase.
  *
- * UX intent:
- *   - Visual reveal (emoji, correct/wrong banner, Next button) appears
- *     IMMEDIATELY — never blocked on the network.
- *   - /api/feedback runs in parallel. When text + audio arrive, the speech
- *     bubble fades in and audio plays in the background.
- *   - The Next button is never disabled waiting on audio — kids can
- *     advance whenever. Clicking Next stops any playing audio.
+ * UX flow:
+ *   1. Visual reveal (emoji, correct/wrong) appears INSTANTLY.
+ *   2. /api/feedback was pre-warmed during the round, so text + audio
+ *      arrive in ~100-200ms (Upstash cache hit).
+ *   3. Speech bubble fades in, audio plays, owl wiggles.
+ *   4. Next button is disabled WHILE audio is playing.
+ *   5. "Skip" link appears after 1.5s for impatient parents.
+ *   6. If fetch failed or audio never arrives, Next unlocks after 2s max.
  */
 
 interface MascotFeedbackProps {
@@ -38,11 +39,26 @@ export default function MascotFeedback({
 }: MascotFeedbackProps) {
   const [text, setText] = useState<string | null>(null);
   const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
+  const [audioEnded, setAudioEnded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [skipReady, setSkipReady] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fetchedRef = useRef(false);
 
-  // Fetch feedback in the background — never blocks the UI.
+  // Skip available after 1.5s for parents who want to hurry
+  useEffect(() => {
+    const t = setTimeout(() => setSkipReady(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Hard timeout: if feedback never arrives, unlock after 2s
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 2000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Fetch feedback — should be a cache hit (pre-warmed) = ~100ms
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
@@ -54,13 +70,13 @@ export default function MascotFeedback({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ animalId, guessId, correct }),
         });
-        if (!res.ok) return;
+        if (!res.ok) throw new Error("feedback failed");
         const data = await res.json();
         if (cancelled) return;
         setText(data.text);
         setAudioDataUrl(data.audioDataUrl);
       } catch {
-        /* silent — reveal UI is already shown */
+        if (!cancelled) setTimedOut(true); // unlock Next
       }
     })();
     return () => {
@@ -68,18 +84,27 @@ export default function MascotFeedback({
     };
   }, [animalId, guessId, correct]);
 
-  // Play audio as soon as it arrives — non-blocking.
+  // Play audio as soon as it arrives
   useEffect(() => {
     if (!audioDataUrl) return;
     const audio = new Audio(audioDataUrl);
     audioRef.current = audio;
-    const onEnded = () => setIsPlaying(false);
-    const onError = () => setIsPlaying(false);
+    const onEnded = () => {
+      setIsPlaying(false);
+      setAudioEnded(true);
+    };
+    const onError = () => {
+      setIsPlaying(false);
+      setAudioEnded(true);
+    };
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
     audio.play().then(
       () => setIsPlaying(true),
-      () => setIsPlaying(false) // autoplay blocked, ignore silently
+      () => {
+        setIsPlaying(false);
+        setAudioEnded(true); // autoplay blocked → unlock
+      }
     );
     return () => {
       audio.pause();
@@ -87,6 +112,8 @@ export default function MascotFeedback({
       audio.removeEventListener("error", onError);
     };
   }, [audioDataUrl]);
+
+  const canAdvance = audioEnded || skipReady || timedOut;
 
   function handleContinue() {
     if (audioRef.current) audioRef.current.pause();
@@ -139,7 +166,7 @@ export default function MascotFeedback({
         )}
       </motion.div>
 
-      {/* Mascot speech bubble — fades in ONLY when text is ready */}
+      {/* Mascot speech bubble — fades in when text arrives */}
       <AnimatePresence>
         {text && (
           <motion.div
@@ -187,24 +214,47 @@ export default function MascotFeedback({
         )}
       </AnimatePresence>
 
-      {/* Next button — always enabled */}
-      <motion.button
-        onClick={handleContinue}
-        whileHover={{ y: -2, scale: 1.02 }}
-        whileTap={{ y: 2, scale: 0.98 }}
-        className="kid-btn font-display"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--safari-gold) 0%, var(--safari-amber) 100%)",
-          borderBottomColor: "var(--safari-amber-d)",
-          color: "var(--jungle-deep)",
-          padding: "1rem 2rem",
-          fontSize: "1.05rem",
-          minWidth: "220px",
-        }}
-      >
-        {isLastRound ? "See my safari log →" : "Next round →"}
-      </motion.button>
+      {/* Next button — locked during audio, skip available after 1.5s */}
+      <div className="flex flex-col items-center gap-2">
+        <motion.button
+          onClick={canAdvance ? handleContinue : undefined}
+          disabled={!canAdvance}
+          whileHover={canAdvance ? { y: -2, scale: 1.02 } : {}}
+          whileTap={canAdvance ? { y: 2, scale: 0.98 } : {}}
+          className="kid-btn font-display disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: canAdvance
+              ? "linear-gradient(135deg, var(--safari-gold) 0%, var(--safari-amber) 100%)"
+              : "rgba(244, 167, 43, 0.25)",
+            borderBottomColor: canAdvance
+              ? "var(--safari-amber-d)"
+              : "rgba(244, 167, 43, 0.15)",
+            color: canAdvance ? "var(--jungle-deep)" : "rgba(255, 244, 214, 0.5)",
+            padding: "1rem 2rem",
+            fontSize: "1.05rem",
+            minWidth: "220px",
+          }}
+        >
+          {!canAdvance
+            ? "🔊 Listen..."
+            : isLastRound
+            ? "See my safari log →"
+            : "Next round →"}
+        </motion.button>
+
+        {/* Subtle skip link for parents who want to hurry */}
+        {!canAdvance && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: skipReady ? 0.7 : 0 }}
+            onClick={skipReady ? handleContinue : undefined}
+            className="text-xs font-bold uppercase tracking-widest cursor-pointer"
+            style={{ color: "rgba(255, 244, 214, 0.5)" }}
+          >
+            skip →
+          </motion.button>
+        )}
+      </div>
     </motion.div>
   );
 }
