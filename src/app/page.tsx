@@ -220,33 +220,63 @@ export default function Home() {
               onLeaderboard={() => router.push("/leaderboard")}
             />
 
-            <QuestPickerSection
-              nickValid={nickValid}
-              dailyDone={dailyDone}
-              dailyReady={dailyReady}
-              navigating={navigating}
-              countdown={countdown}
-              onStart={startMode}
-            />
+            {/* Two-column grid: actions (left) + learn (right). On mobile
+                everything stacks in source order. */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start">
+              {/* ─── Left: explorer name + quest cards stacked ─── */}
+              <div className="space-y-5 sm:space-y-6">
+                <ExplorerProfileCard
+                  nick={nick}
+                  nickValid={nickValid}
+                  nickSaved={nickSaved}
+                  onChange={handleNickChange}
+                />
 
-            <ExplorerProfileCard
-              nick={nick}
-              nickValid={nickValid}
-              nickSaved={nickSaved}
-              onChange={handleNickChange}
-            />
+                {dailyDone ? (
+                  <DoneCard countdown={countdown} />
+                ) : (
+                  <QuestCard
+                    title="Today's Expedition"
+                    subtitle="3 special animals — today only"
+                    emoji="🎯"
+                    accent="primary"
+                    loading={!dailyReady || navigating === "daily"}
+                    loadingLabel={
+                      navigating === "daily"
+                        ? "Starting..."
+                        : !dailyReady
+                        ? "Getting ready..."
+                        : ""
+                    }
+                    onClick={() => startMode("daily")}
+                    hint={!nickValid ? "Type your name first" : undefined}
+                  />
+                )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-6">
-              <AnimalOfDayCard aotd={aotd} className="lg:col-span-2" />
-              <BiomeMapCard
-                className="lg:col-span-3"
-                biomes={BIOMES}
-                biomeTotals={biomeTotals}
-                stickersByBiome={stickersByBiome}
-                stickersCount={stickers.size}
-                totalStickers={totalStickers}
-                stickerPct={stickerPct}
-              />
+                <QuestCard
+                  title="Free Roam"
+                  subtitle="Random animals, any time"
+                  emoji="🎧"
+                  accent="neutral"
+                  loading={navigating === "practice"}
+                  loadingLabel="Starting..."
+                  onClick={() => startMode("practice")}
+                  hint={!nickValid ? "Type your name first" : undefined}
+                />
+              </div>
+
+              {/* ─── Right: Today's Discovery + Safari Regions stacked ─── */}
+              <div className="space-y-5 sm:space-y-6">
+                <AnimalOfDayCard aotd={aotd} />
+                <BiomeMapCard
+                  biomes={BIOMES}
+                  biomeTotals={biomeTotals}
+                  stickersByBiome={stickersByBiome}
+                  stickersCount={stickers.size}
+                  totalStickers={totalStickers}
+                  stickerPct={stickerPct}
+                />
+              </div>
             </div>
 
             <HowItWorksStrip />
@@ -513,11 +543,19 @@ function AnimalOfDayCard({
       transition={{ duration: 0.5, delay: 0.15 }}
       className={className}
     >
-      <SectionHeader emoji="💫" title="Today's Discovery" />
       <div
         className="premium-card relative overflow-hidden p-5 sm:p-6"
         style={{ minHeight: "240px" }}
       >
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-base" aria-hidden>💫</span>
+          <h3
+            className="font-display font-black uppercase tracking-[0.25em] text-[11px]"
+            style={{ color: "rgba(244, 167, 43, 0.9)" }}
+          >
+            Today&apos;s Discovery
+          </h3>
+        </div>
         <span
           aria-hidden
           className="absolute opacity-[0.06] animate-leaf-sway select-none pointer-events-none"
@@ -590,8 +628,16 @@ function BiomeMapCard({
       transition={{ duration: 0.5, delay: 0.2 }}
       className={className}
     >
-      <SectionHeader emoji="🗺️" title="Safari Regions" />
       <div className="premium-card p-5 sm:p-6" style={{ minHeight: "240px" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-base" aria-hidden>🗺️</span>
+          <h3
+            className="font-display font-black uppercase tracking-[0.25em] text-[11px]"
+            style={{ color: "rgba(244, 167, 43, 0.9)" }}
+          >
+            Safari Regions
+          </h3>
+        </div>
         <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
           {biomes.map((b) => {
             const total = biomeTotals.get(b.id) ?? 0;
