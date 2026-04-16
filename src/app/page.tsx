@@ -250,7 +250,7 @@ export default function Home() {
                 ) : (
                   <QuestCard
                     title="Today's Expedition"
-                    subtitle="3 special animals — today only"
+                    subtitle="3 special animals, today only"
                     emoji="🎯"
                     accent="primary"
                     loading={!dailyReady || navigating === "daily"}
@@ -426,7 +426,7 @@ function QuestPickerSection({
         ) : (
           <QuestCard
             title="Today's Expedition"
-            subtitle="3 special animals — today only"
+            subtitle="3 special animals, today only"
             emoji="🎯"
             accent="primary"
             loading={!dailyReady || navigating === "daily"}
@@ -926,7 +926,7 @@ function QuestCard({
           <span>{emoji}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-xl sm:text-2xl font-black leading-tight">
+          <h3 className="font-display text-2xl sm:text-3xl font-bold leading-tight tracking-tight">
             {title}
           </h3>
           <p className="text-sm font-bold opacity-90">{subtitle}</p>
@@ -976,7 +976,7 @@ function DoneCard({ countdown }: { countdown: string }) {
           🏅
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-xl sm:text-2xl font-black leading-tight">
+          <h3 className="font-display text-2xl sm:text-3xl font-bold leading-tight tracking-tight">
             Expedition complete!
           </h3>
           <p
