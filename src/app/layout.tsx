@@ -16,20 +16,20 @@ const display = Fredoka({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://audiovisa.vercel.app"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://junglesafari.netlify.app"
   ),
-  title: "Audio Visa — The Jungle Safari",
+  title: "Jungle Safari — Learn Animal Sounds",
   description:
     "A playful audio expedition for little explorers (ages 1–3). Hear the sound, tap the animal, collect safari badges. Built with ElevenLabs + turbopuffer.",
   openGraph: {
-    title: "Audio Visa — The Jungle Safari",
+    title: "Jungle Safari — Learn Animal Sounds",
     description: "Hear it. Tap it. Collect safari badges.",
     type: "website",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Audio Visa — The Jungle Safari",
+    title: "Jungle Safari — Learn Animal Sounds",
     description: "Hear it. Tap it. Collect safari badges.",
   },
 };
