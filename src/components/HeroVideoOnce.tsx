@@ -89,8 +89,7 @@ export default function HeroVideoOnce({
 
   return (
     <section
-      className="relative w-full overflow-hidden"
-      style={{ height: "100vh" }}
+      className="relative w-full overflow-hidden hero-section"
       aria-label="Welcome to Audio Visa Safari"
     >
       {/* Gradient fallback — always rendered behind */}
@@ -126,11 +125,15 @@ export default function HeroVideoOnce({
         />
       </div>
 
-      {/* Video fills the whole hero — always visible, gradient sits behind */}
+      {/* Video fills the whole hero edge-to-edge on every viewport.
+         On narrow phones the 16:9 frame gets cropped on the sides —
+         the important content (title, button, animals) sits center so
+         nothing critical is lost. */}
       {!videoFailed && (
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "center center" }}
           src={src}
           autoPlay
           muted
@@ -158,13 +161,13 @@ export default function HeroVideoOnce({
         style={{ background: "transparent", border: "none", zIndex: 5 }}
       />
 
-      {/* Dark pill caption at the bottom — darker, higher contrast */}
+      {/* Dark pill caption at the bottom — adapts to viewport width */}
       <div
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2"
-        style={{ bottom: "4vh", zIndex: 6 }}
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[min(92vw,420px)] flex justify-center"
+        style={{ bottom: "max(env(safe-area-inset-bottom, 0px) + 1.5rem, 4vh)", zIndex: 6 }}
       >
         <div
-          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full font-display text-[11px] sm:text-xs font-black uppercase tracking-[0.3em]"
+          className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 rounded-full font-display text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] whitespace-nowrap"
           style={{
             background: "rgba(6, 18, 12, 0.82)",
             border: "1px solid rgba(244, 167, 43, 0.5)",
@@ -178,7 +181,7 @@ export default function HeroVideoOnce({
           {locked ? (
             <>
               <span
-                className="inline-block w-1.5 h-1.5 rounded-full"
+                className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
                 style={{
                   background: "rgba(244, 167, 43, 0.7)",
                   animation: "pulse-glow 1s ease-in-out infinite",
@@ -188,9 +191,11 @@ export default function HeroVideoOnce({
             </>
           ) : (
             <>
-              <span className="text-base leading-none">🌿</span>
-              Tap anywhere to enter the safari
-              <span className="text-base leading-none">↓</span>
+              <span className="text-sm sm:text-base leading-none">🌿</span>
+              {/* Longer copy on desktop, shorter on phone */}
+              <span className="hidden sm:inline">Tap anywhere to enter the safari</span>
+              <span className="sm:hidden">Tap to enter safari</span>
+              <span className="text-sm sm:text-base leading-none">↓</span>
             </>
           )}
         </div>

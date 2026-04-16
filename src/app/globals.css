@@ -76,6 +76,15 @@ html {
   background: var(--jungle-deep);
 }
 
+/* Hero section — fills the mobile viewport without the iOS browser
+   UI eating into it. Falls back gracefully on older browsers. */
+.hero-section {
+  height: 100vh;
+  height: 100dvh;
+  height: 100svh;
+  min-height: 600px;
+}
+
 body {
   background: transparent;
   color: var(--text-primary);
