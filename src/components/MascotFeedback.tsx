@@ -41,28 +41,25 @@ export default function MascotFeedback({
   const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
   const [audioEnded, setAudioEnded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [skipReady, setSkipReady] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fetchedRef = useRef(false);
 
-  // Skip available after 1.5s for parents who want to hurry
+  // Safety timeout: if the audio never even starts loading after 6s
+  // (e.g. backend is down), unlock Next so the game isn't stuck forever.
+  // The normal path is: fetch returns → audio plays → `ended` event → unlock.
   useEffect(() => {
-    const t = setTimeout(() => setSkipReady(true), 1500);
+    const t = setTimeout(() => setTimedOut(true), 6000);
     return () => clearTimeout(t);
   }, []);
 
-  // Hard timeout: if feedback never arrives, unlock after 2s
-  useEffect(() => {
-    const t = setTimeout(() => setTimedOut(true), 2000);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Fetch feedback — should be a cache hit (pre-warmed) = ~100ms
+  // Fetch feedback — should be a cache hit (pre-warmed) = ~100ms.
+  // We deliberately DON'T use a `cancelled` flag: React strict-mode runs
+  // effects twice, and the first cleanup would set cancelled=true, causing
+  // the real response to be discarded and only the fallback to render.
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
-    let cancelled = false;
     (async () => {
       try {
         const res = await fetch("/api/feedback", {
@@ -72,16 +69,12 @@ export default function MascotFeedback({
         });
         if (!res.ok) throw new Error("feedback failed");
         const data = await res.json();
-        if (cancelled) return;
         setText(data.text);
         setAudioDataUrl(data.audioDataUrl);
       } catch {
-        if (!cancelled) setTimedOut(true); // unlock Next
+        setTimedOut(true);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [animalId, guessId, correct]);
 
   // Play audio as soon as it arrives
@@ -113,7 +106,9 @@ export default function MascotFeedback({
     };
   }, [audioDataUrl]);
 
-  const canAdvance = audioEnded || skipReady || timedOut;
+  // Next is locked until the mascot finishes speaking. The only way out
+  // without listening is if the 6s safety timeout fires (backend failure).
+  const canAdvance = audioEnded || timedOut;
 
   function handleContinue() {
     if (audioRef.current) audioRef.current.pause();
@@ -166,9 +161,17 @@ export default function MascotFeedback({
         )}
       </motion.div>
 
-      {/* Mascot speech bubble — fades in when text arrives */}
-      <AnimatePresence>
-        {text && (
+      {/* Mascot speech bubble — always visible. Falls back to a baseline
+          message if /api/feedback errors or is slow. */}
+      {(() => {
+        const fallback = correct
+          ? `Yes! That's a ${correctName}!`
+          : pickedName
+          ? `Not quite — that was a ${correctName}, not a ${pickedName}.`
+          : `That was a ${correctName}!`;
+        const displayText = text ?? (timedOut ? fallback : null);
+        if (!displayText) return null;
+        return (
           <motion.div
             key="bubble"
             initial={{ opacity: 0, y: 10, scale: 0.96 }}
@@ -201,7 +204,7 @@ export default function MascotFeedback({
               🦉
             </motion.div>
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold leading-snug">{text}</p>
+              <p className="text-base font-bold leading-snug">{displayText}</p>
               {isPlaying && (
                 <div className="mt-2 flex items-center gap-1">
                   <span className="text-xs font-black uppercase tracking-widest opacity-65">
@@ -211,8 +214,8 @@ export default function MascotFeedback({
               )}
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        );
+      })()}
 
       {/* Next button — locked during audio, skip available after 1.5s */}
       <div className="flex flex-col items-center gap-2">
@@ -242,18 +245,6 @@ export default function MascotFeedback({
             : "Next round →"}
         </motion.button>
 
-        {/* Subtle skip link for parents who want to hurry */}
-        {!canAdvance && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: skipReady ? 0.7 : 0 }}
-            onClick={skipReady ? handleContinue : undefined}
-            className="text-xs font-bold uppercase tracking-widest cursor-pointer"
-            style={{ color: "rgba(255, 244, 214, 0.5)" }}
-          >
-            skip →
-          </motion.button>
-        )}
       </div>
     </motion.div>
   );

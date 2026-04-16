@@ -101,7 +101,12 @@ export default function Home() {
     setStreak(getDisplayStreak());
     setStickers(getStickers());
     setDailyDone(hasPlayedDailyToday());
-  }, []);
+    // Prefetch the /play routes so the first click is instant — no cold
+    // Turbopack compile. Fires both daily + practice variants.
+    router.prefetch("/play?mode=daily");
+    router.prefetch("/play?mode=practice");
+    router.prefetch("/leaderboard");
+  }, [router]);
 
   // Always start at the top on refresh — the browser's default scroll
   // restoration would drop returning visitors back at the app section.
@@ -149,7 +154,8 @@ export default function Home() {
   }
 
   function startMode(mode: "daily" | "practice") {
-    if (mode === "daily" && !nick.trim()) {
+    // Require a valid nickname for BOTH modes
+    if (!nick.trim() || !NICKNAME_RE.test(nick.trim())) {
       document.getElementById("nick-input")?.focus();
       return;
     }
@@ -400,6 +406,7 @@ function QuestPickerSection({
           loading={navigating === "practice"}
           loadingLabel="Starting..."
           onClick={() => onStart("practice")}
+          hint={!nickValid ? "Type your name first" : undefined}
         />
       </div>
     </motion.section>
@@ -462,7 +469,7 @@ function ExplorerProfileCard({
             type="text"
             value={nick}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="e.g. Mia"
+            placeholder="e.g. Eleven"
             maxLength={20}
             className="mt-2 w-full rounded-xl px-4 py-2.5 text-base font-black outline-none transition-colors"
             style={{
@@ -800,23 +807,24 @@ function QuestCard({
   const isPrimary = accent === "primary";
   return (
     <motion.button
-      whileHover={loading ? {} : { y: -3 }}
-      whileTap={loading ? {} : { y: 2 }}
-      transition={{ type: "spring", stiffness: 400, damping: 24 }}
+      whileHover={loading ? {} : { y: -4, scale: 1.01 }}
+      whileTap={loading ? {} : { y: 2, scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 400, damping: 22 }}
       onClick={loading ? undefined : onClick}
       disabled={loading}
-      className="w-full rounded-[24px] p-5 sm:p-6 flex flex-col gap-3 text-left cursor-pointer disabled:cursor-not-allowed min-h-[170px]"
+      className="relative w-full rounded-[28px] p-5 sm:p-6 flex flex-col gap-3 text-left cursor-pointer disabled:cursor-not-allowed min-h-[180px] overflow-hidden"
       style={{
-        background: isPrimary
-          ? "linear-gradient(135deg, #f4a72b 0%, #cf8b14 100%)"
-          : "linear-gradient(180deg, rgba(28, 93, 68, 0.85) 0%, rgba(14, 48, 34, 0.95) 100%)",
-        color: isPrimary ? "var(--jungle-deep)" : "var(--safari-cream)",
-        border: isPrimary
-          ? "none"
-          : "1px solid rgba(244, 167, 43, 0.35)",
-        boxShadow: isPrimary
-          ? "inset 0 1px 0 rgba(255, 244, 214, 0.5), inset 0 -6px 0 rgba(0, 0, 0, 0.2), 0 22px 40px -16px rgba(244, 167, 43, 0.45)"
-          : "0 16px 32px -12px rgba(0, 0, 0, 0.55)",
+        // Both cards share the same calm jungle look — no special primary
+        // styling. Differentiation comes from content (title + subtitle).
+        background:
+          "linear-gradient(160deg, rgba(53, 130, 102, 0.95) 0%, rgba(17, 70, 58, 0.97) 55%, rgba(10, 50, 38, 1) 100%)",
+        color: "var(--safari-cream)",
+        border: "1px solid rgba(255, 244, 214, 0.12)",
+        boxShadow: [
+          "inset 0 1px 0 rgba(255, 244, 214, 0.08)",
+          "inset 0 -1.5px 0 rgba(0, 0, 0, 0.25)",
+          "0 14px 32px -12px rgba(0, 0, 0, 0.5)",
+        ].join(", "),
         opacity: loading ? 0.88 : 1,
       }}
       title={hint}

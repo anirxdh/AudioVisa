@@ -7,26 +7,26 @@
    ────────────────────────────────────────────────────────── */
 
 :root {
-  /* Jungle palette */
-  --jungle-deep:    #062a1e;
-  --jungle-dark:    #0d3b2e;
-  --jungle:         #1c5d44;
-  --jungle-mid:     #2d7d5a;
-  --jungle-light:   #4c9e6d;
-  --leaf:           #7fb069;
-  --leaf-bright:    #88c34a;
-  --leaf-shadow:    #5f8c3f;
+  /* Jungle palette — warmer, slightly more inviting */
+  --jungle-deep:    #0a3226;
+  --jungle-dark:    #11463a;
+  --jungle:         #23664c;
+  --jungle-mid:     #358266;
+  --jungle-light:   #54a580;
+  --leaf:           #89bf6e;
+  --leaf-bright:    #9ed04f;
+  --leaf-shadow:    #6a9c3c;
 
-  /* Safari accents */
-  --safari-gold:    #f4a72b;
-  --safari-gold-d:  #cf8b14;
-  --safari-amber:   #ff9600;
-  --safari-amber-d: #d97700;
-  --safari-coral:   #e76f51;
-  --safari-coral-d: #c4512e;
-  --safari-cream:   #fff4d6;
-  --safari-sand:    #ead7a7;
-  --safari-paper:   #fbefc7;
+  /* Safari accents — more saturated gold + warmer coral */
+  --safari-gold:    #ffb02b;
+  --safari-gold-d:  #d98a10;
+  --safari-amber:   #ff8a00;
+  --safari-amber-d: #cc6d00;
+  --safari-coral:   #ef7a5a;
+  --safari-coral-d: #c9543a;
+  --safari-cream:   #fff2cf;
+  --safari-sand:    #e8d1a2;
+  --safari-paper:   #fbebc4;
 
   /* Text on dark */
   --text-primary:   #fff4d6;
@@ -79,40 +79,57 @@ html {
 body {
   background: transparent;
   color: var(--text-primary);
-  font-family: var(--font-body), "Nunito", system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-family: var(--font-body), "Inter", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  font-feature-settings: "cv11", "ss01", "ss03";
 }
 
-/* Display font for safari-poster-style headlines */
+/* Display font — Plus Jakarta Sans: modern, geometric, warm */
 .font-display {
-  font-family: var(--font-display), "Fredoka", system-ui, sans-serif;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 /* ──────────────────────────────────────────────────────────
-   Tactile 3D buttons — kept from Duolingo model, retinted
+   Tactile 3D buttons — dimensional with inset highlights
    ────────────────────────────────────────────────────────── */
 .kid-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  padding: 0.95rem 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: 16px;
-  border: 2px solid transparent;
-  border-bottom-width: 4px;
+  border-radius: 14px;
+  border: none;
   cursor: pointer;
-  transition: transform 0.08s ease, filter 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
   user-select: none;
   line-height: 1;
   color: var(--safari-cream);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 10px 24px -10px rgba(0, 0, 0, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.15);
 }
-.kid-btn:hover { filter: brightness(1.08); }
-.kid-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.kid-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 16px 30px -10px rgba(0, 0, 0, 0.55),
+    0 3px 6px rgba(0, 0, 0, 0.18);
+}
+.kid-btn:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 4px 12px -4px rgba(0, 0, 0, 0.5);
+}
 .kid-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -142,21 +159,33 @@ body {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 1.1rem 1.25rem;
-  border-radius: 18px;
-  background: rgba(255, 244, 214, 0.07);
-  border: 2px solid rgba(255, 244, 214, 0.2);
-  border-bottom-width: 4px;
+  padding: 1.2rem 1.35rem;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 244, 214, 0.09) 0%, rgba(255, 244, 214, 0.04) 100%);
+  border: 1.5px solid rgba(255, 244, 214, 0.18);
   font-weight: 800;
   font-size: 1.05rem;
   text-align: left;
   color: var(--safari-cream);
   cursor: pointer;
-  transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
-  min-height: 72px;
+  transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.2s ease;
+  min-height: 76px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25),
+    0 6px 16px -6px rgba(0, 0, 0, 0.45);
 }
-.kid-tile:hover { border-color: var(--safari-gold); background: rgba(255, 244, 214, 0.11); }
-.kid-tile:active { transform: translateY(2px); border-bottom-width: 2px; }
+.kid-tile:hover {
+  border-color: var(--safari-gold);
+  background: linear-gradient(180deg, rgba(255, 176, 43, 0.18) 0%, rgba(255, 176, 43, 0.05) 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25),
+    0 10px 24px -6px rgba(255, 176, 43, 0.25),
+    0 8px 20px -8px rgba(0, 0, 0, 0.55);
+}
+.kid-tile:active { transform: translateY(2px); }
 .kid-tile:disabled { cursor: not-allowed; opacity: 0.85; }
 
 .kid-card {
@@ -179,17 +208,19 @@ body {
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Premium glass card for jungle theme */
+/* Premium glass card for jungle theme — deeper, more dimensional */
 .premium-card {
-  background: rgba(13, 59, 46, 0.72);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(127, 176, 105, 0.35);
-  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(35, 102, 76, 0.32) 0%, rgba(17, 70, 58, 0.72) 100%);
+  backdrop-filter: blur(24px) saturate(1.25);
+  -webkit-backdrop-filter: blur(24px) saturate(1.25);
+  border: 1px solid rgba(137, 191, 110, 0.38);
+  border-radius: 26px;
   box-shadow:
-    0 1px 0 rgba(255, 244, 214, 0.1) inset,
-    0 24px 48px -20px rgba(0, 0, 0, 0.55),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+    inset 0 1.5px 0 rgba(255, 244, 214, 0.18),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.35),
+    0 32px 64px -24px rgba(0, 0, 0, 0.7),
+    0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .premium-card-solid {

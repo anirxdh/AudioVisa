@@ -68,7 +68,12 @@ function ResultsInner() {
         fetch("/api/leaderboard/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ gameId: data.gameId, nickname }),
+          body: JSON.stringify({
+            gameId: data.gameId,
+            nickname,
+            score: data.totalScore,
+            mode: data.mode,
+          }),
         })
           .then((res) => res.json())
           .then((payload) => {

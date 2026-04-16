@@ -367,34 +367,7 @@ function PlayPageInner() {
         )}
 
         <AnimatePresence mode="wait">
-          {phase === "loading" && (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center flex-1 gap-4"
-            >
-              <div className="flex gap-2">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="w-4 h-4 rounded-full"
-                    style={{
-                      background: "var(--safari-gold)",
-                      animation: `pulse-glow 1s ease-in-out ${i * 0.15}s infinite`,
-                    }}
-                  />
-                ))}
-              </div>
-              <p
-                className="font-display font-bold"
-                style={{ color: "var(--safari-cream)" }}
-              >
-                Saddling up the safari...
-              </p>
-            </motion.div>
-          )}
+          {phase === "loading" && <SafariLoader />}
 
           {phase === "playing" && round && revealCorrect === null && (
             <motion.div
@@ -457,6 +430,75 @@ function PlayPageInner() {
 }
 
 /* ───────── Components ───────── */
+
+function SafariLoader() {
+  const messages = [
+    "Packing your safari bag...",
+    "Finding 3 special animals...",
+    "Warming up the jungle...",
+    "Almost ready...",
+  ];
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => {
+      setIdx((v) => (v + 1) % messages.length);
+    }, 900);
+    return () => clearInterval(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <motion.div
+      key="loading"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center justify-center flex-1 gap-6 w-full max-w-md"
+    >
+      {/* Rotating emoji bubble */}
+      <motion.div
+        animate={{ rotate: [0, 8, -8, 0], y: [0, -4, 0] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        className="text-7xl"
+        aria-hidden
+      >
+        🌿
+      </motion.div>
+
+      {/* Progress bar */}
+      <div
+        className="w-64 h-1.5 rounded-full overflow-hidden"
+        style={{ background: "rgba(255, 244, 214, 0.08)" }}
+      >
+        <motion.div
+          initial={{ x: "-100%" }}
+          animate={{ x: "100%" }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          className="h-full w-1/2 rounded-full"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, var(--safari-gold) 50%, transparent 100%)",
+          }}
+        />
+      </div>
+
+      {/* Rotating status message */}
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={idx}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.3 }}
+          className="font-display text-lg font-bold text-center"
+          style={{ color: "var(--safari-cream)" }}
+        >
+          {messages[idx]}
+        </motion.p>
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 function SpeakerCard({
   onPlay,

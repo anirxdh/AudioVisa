@@ -29,7 +29,6 @@ export default function HeroVideoOnce({
   scrollDurationMs = 2000,
 }: HeroVideoOnceProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [locked, setLocked] = useState(true);
 
@@ -127,18 +126,16 @@ export default function HeroVideoOnce({
         />
       </div>
 
-      {/* Video fills the whole hero */}
+      {/* Video fills the whole hero — always visible, gradient sits behind */}
       {!videoFailed && (
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
-          style={{ opacity: videoReady ? 1 : 0 }}
+          className="absolute inset-0 h-full w-full object-cover"
           src={src}
           autoPlay
           muted
           playsInline
           preload="auto"
-          onCanPlay={() => setVideoReady(true)}
           onError={() => setVideoFailed(true)}
           onEnded={(e) => {
             const vid = e.currentTarget;
