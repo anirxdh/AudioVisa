@@ -1,11 +1,15 @@
 # Jungle Safari 🐘🦁🦒🐵🦜
 
+### 🌿 Live at **[thejunglesafari.netlify.app](https://thejunglesafari.netlify.app)** 🌿
+
 **A playful audio expedition for little explorers (ages 1–3). Hear a real animal sound, tap the right animal, earn safari badges — while an AI mascot cheers them on with a voice-spoken fact tailored to their exact pick.**
 
 Built for **#ElevenHacks** with **[ElevenLabs](https://elevenlabs.io)** + **[turbopuffer](https://turbopuffer.com)** + **[Upstash Redis](https://upstash.com)** + **[OpenAI](https://openai.com)**.
 
 <p align="center">
-  <img src="public/background.png" width="600" alt="Jungle Safari" />
+  <a href="https://thejunglesafari.netlify.app">
+    <img src="public/background.png" width="600" alt="Jungle Safari — play at thejunglesafari.netlify.app" />
+  </a>
 </p>
 
 ---
@@ -65,7 +69,7 @@ Zero-wait UX: every sound, every mascot response, every reveal is pre-warmed bef
                             └────────────────────────┘                          
 ```
 
-**Deploy target: Netlify.** Frontend is served from the Netlify CDN; API routes become Netlify serverless functions automatically.
+**Deploy target: Netlify.** Frontend is served from the Netlify CDN; API routes become Netlify serverless functions automatically. Production is live at [thejunglesafari.netlify.app](https://thejunglesafari.netlify.app).
 
 ---
 
@@ -158,7 +162,7 @@ cp .env.example .env.local
 #   ELEVENLABS_API_KEY
 #   TURBOPUFFER_API_KEY  + TURBOPUFFER_REGION (default gcp-us-east4)
 #   UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
-#   NEXT_PUBLIC_BASE_URL (optional; defaults to junglesafari.netlify.app)
+#   NEXT_PUBLIC_BASE_URL (optional; defaults to thejunglesafari.netlify.app)
 
 # 4. (First-time only) Seed turbopuffer (~1 min, ~$0.01 OpenAI)
 npx tsx scripts/seed-animals.ts
@@ -178,8 +182,12 @@ All 55 animal SFX mp3s are already committed to `public/animals/` so the game wo
 
 ## Deploying to Netlify
 
-1. Push to GitHub (already done — this repo).
-2. On [app.netlify.com](https://app.netlify.com) → **Add new site → Import from Git → anirxdh/JungleSafari**.
+The production build of this repo is already live at **[thejunglesafari.netlify.app](https://thejunglesafari.netlify.app)** — any push to `main` auto-deploys.
+
+To run your own fork:
+
+1. Push to GitHub.
+2. On [app.netlify.com](https://app.netlify.com) → **Add new site → Import from Git → your-fork/JungleSafari**.
 3. Build command: `npm run build` · Publish directory: `.next`. Netlify auto-detects Next.js.
 4. Add environment variables (all six from `.env.example`):
    - `OPENAI_API_KEY`
